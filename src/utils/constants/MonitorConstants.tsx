@@ -95,10 +95,10 @@ export const SENSORS: SensorConfig[] = [
 ];
 
 // ===== [CONFIG] Lokasi controller =====
-// [NEW] Satu titik di peta untuk ketiga sensor. Koordinat masih CONTOH —
-// ganti dengan titik pemasangan ESP32. Sekaligus jadi pusat peta.
+// Satu titik di peta untuk ketiga sensor = titik pemasangan ESP32.
+// Sekaligus jadi pusat peta.
 export const DEVICE_NAME = "Stasiun ketinggian air";
-export const DEVICE_LOCATION: [number, number] = [-7.5706, 110.8286];
+export const DEVICE_LOCATION: [number, number] = [-6.271027, 106.846205];
 
 // ===== [CONFIG] Peta =====
 // [CHANGED] MAP_CENTER dihapus — peta berpusat di DEVICE_LOCATION.
