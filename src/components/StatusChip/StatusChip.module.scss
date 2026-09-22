@@ -1,0 +1,70 @@
+@use "variables" as *;
+
+.statusChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.4;
+  white-space: nowrap;
+  background: $white-color-alt;
+  color: $soft-gray-darker;
+
+  svg {
+    flex-shrink: 0;
+  }
+
+  &.normal {
+    background: $soft-green-lighter-alt-two;
+    color: $green-color-darker;
+
+    svg {
+      color: $status-good;
+    }
+  }
+
+  &.siaga {
+    background: $soft-yellow-color;
+    color: $yellow-color-darker;
+
+    svg {
+      color: $yellow-color-darker-alt;
+    }
+  }
+
+  &.bahaya {
+    background: $soft-red-color-lighter;
+    color: $red-color-darker;
+
+    svg {
+      color: $status-critical;
+    }
+  }
+
+  :global(body.darkTheme) & {
+    background: rgba($white-color, 0.06);
+    color: $dark-text-muted;
+
+    &.normal {
+      background: rgba($status-good, 0.16);
+      color: $green-color-alt;
+    }
+
+    &.siaga {
+      background: rgba($status-warning, 0.16);
+      color: $status-warning;
+
+      svg {
+        color: $status-warning;
+      }
+    }
+
+    &.bahaya {
+      background: rgba($status-critical, 0.2);
+      color: $soft-red-color-alt-three;
+    }
+  }
+}

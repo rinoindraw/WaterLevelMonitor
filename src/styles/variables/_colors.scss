@@ -1,0 +1,59 @@
+// Palet warna aplikasi. Hanya token yang dipakai — tambahkan di sini dulu
+// sebelum memakai warna baru di komponen.
+//
+// Arah warna: latar lavender sangat muda dengan kartu putih kebiruan (terang), abu
+// netral gelap (gelap), dan aksen indigo. Aksen sengaja jauh dari warna seri
+// sensor (biru, oranye, tosca) dan dari warna status.
+
+// ===== Latar & permukaan (terang) =====
+$main-background-color: #f4f4fc; // latar halaman, lavender sangat muda
+$surface-color: #fbfbff; // kartu, navbar, popup — putih kebiruan
+$primary-color: #fbfbff; // latar navbar
+$white-color: #ffff; // putih murni: lingkar titik legenda
+$white-color-alt: #f5f5f5; // chip status tanpa data
+
+// ===== Aksen =====
+$primary-color-alt-two: #4338ca; // aksen utama (terang): link aktif, ikon
+$primary-color-alt-three: #6366f1; // cincin fokus, spinner
+$primary-color-alt-four: #a5b4fc; // aksen di mode gelap
+
+// ===== Teks & garis (terang) =====
+$gray-label-color: #2b2f3a; // teks utama
+$soft-gray-darker: #6b7080; // teks sekunder
+$gray-color: #7e84a3; // teks spinner
+$gray-color-lighter: #94a3b8; // titik status "menghubungkan"
+$soft-gray-lighter: #e4e5f4; // garis bawah navbar, tepi tombol tema
+$soft-gray-darker-alt: #e4e5f4; // garis tepi kartu
+$black-color: #000; // dasar bayangan
+$black-color-lighter: #333; // warna teks dasar body
+
+// ===== Mode gelap =====
+$dark-color-one: #111318; // latar halaman
+$dark-color-two: #1a1d24; // kartu, navbar, popup
+$dark-border: #2b2f3a;
+$dark-text: #e7e8ee;
+$dark-text-muted: #9b9fb0;
+
+// ===== Status muka air =====
+// Sama dengan STATUS_COLORS di MonitorConstants.tsx. Tidak dipakai untuk seri chart.
+$status-good: #0ca30c;
+$status-warning: #fab219;
+$status-critical: #d03b3b;
+
+// Latar & teks chip status / pesan offline (terang)
+$soft-green-lighter-alt-two: #f0fdf4;
+$green-color-darker: #16610e;
+$soft-yellow-color: #fffbde;
+$yellow-color-darker: #a86523;
+$yellow-color-darker-alt: #e9a319;
+$soft-red-color-lighter: #fef2f2;
+$soft-red-color-alt-two: #fecaca;
+$red-color-darker: #750e21;
+
+// Teks chip status (gelap)
+$green-color-alt: #4ade80;
+$soft-red-color-alt-three: #f87171;
+
+// ===== Tombol tema =====
+$sun-color: #f5a623;
+$moon-color: #7c89a6;

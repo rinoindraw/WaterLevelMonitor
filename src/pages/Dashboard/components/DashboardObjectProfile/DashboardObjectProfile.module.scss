@@ -1,0 +1,135 @@
+@use "variables" as *;
+@use "mixins" as *;
+@use "responsive" as *;
+
+.profileCard {
+  @include panel-card;
+
+  .cardHeader {
+    .cardTitle {
+      font-size: 16px;
+      font-weight: 500;
+      color: $gray-label-color;
+      text-transform: capitalize;
+    }
+
+    .cardDescription {
+      // [CHANGED] max-width: 64ch dihapus — teks memakai lebar penuh kartu
+      // supaya satu baris di desktop
+      font-size: 13px;
+      color: $soft-gray-darker;
+    }
+  }
+
+  .cardBody {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 280px;
+    gap: 16px;
+
+    .chartArea {
+      position: relative;
+      height: 300px;
+
+      .emptyState {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 13px;
+        color: $soft-gray-darker;
+        pointer-events: none;
+      }
+    }
+
+    // Garis pemisah kiri = batas chart ↔ kesimpulan
+    .predictionPanel {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 6px;
+      padding-left: 20px;
+      border-left: 1px solid $soft-gray-darker-alt;
+
+      .predictionCaption {
+        font-size: 13px;
+        color: $soft-gray-darker;
+      }
+
+      .predictionLabel {
+        font-size: 28px;
+        font-weight: 500;
+        line-height: 1.15;
+        color: $gray-label-color;
+        text-transform: capitalize;
+      }
+
+      .predictionDescription {
+        font-size: 13px;
+        color: $soft-gray-darker;
+      }
+
+      .predictionStats {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 4px 12px;
+        margin-top: 10px;
+        font-size: 13px;
+
+        dt {
+          color: $soft-gray-darker;
+        }
+
+        dd {
+          font-weight: 500;
+          color: $gray-label-color;
+          text-align: right;
+          font-variant-numeric: tabular-nums;
+        }
+      }
+    }
+
+    @media (max-width: $bp-tablet) {
+      grid-template-columns: 1fr;
+
+      .predictionPanel {
+        padding: 16px 0 0;
+        border-left: none;
+        border-top: 1px solid $soft-gray-darker-alt;
+      }
+    }
+  }
+
+  :global(body.darkTheme) & {
+    .cardHeader {
+      .cardTitle {
+        color: $dark-text;
+      }
+
+      .cardDescription {
+        color: $dark-text-muted;
+      }
+    }
+
+    .cardBody {
+      .chartArea .emptyState {
+        color: $dark-text-muted;
+      }
+
+      .predictionPanel {
+        border-color: $dark-border;
+
+        .predictionCaption,
+        .predictionDescription,
+        .predictionStats dt {
+          color: $dark-text-muted;
+        }
+
+        .predictionLabel,
+        .predictionStats dd {
+          color: $dark-text;
+        }
+      }
+    }
+  }
+}

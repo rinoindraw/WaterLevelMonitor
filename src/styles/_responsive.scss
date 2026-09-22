@@ -1,0 +1,11 @@
+// Breakpoint bersama. Semuanya menurun (max-width): tampilan dirancang untuk
+// desktop lalu disesuaikan ke layar yang lebih sempit.
+
+// Laptop sempit / tablet mendatar: baris kartu sensor jadi satu kolom.
+$bp-laptop: 1024px;
+
+// Tablet tegak: panel prediksi turun ke bawah chart, judul navbar disembunyikan.
+$bp-tablet: 768px;
+
+// Ponsel: padding halaman dikecilkan, label navbar tinggal ikon.
+$bp-mobile: 480px;

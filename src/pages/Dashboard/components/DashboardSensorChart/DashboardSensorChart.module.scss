@@ -1,0 +1,99 @@
+@use "variables" as *;
+@use "mixins" as *;
+
+.sensorCard {
+  @include panel-card;
+
+  .cardHeader {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+
+    .identity {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+
+      .swatch {
+        @include swatch;
+      }
+
+      .sensorName {
+        font-size: 16px;
+        font-weight: 500;
+        color: $gray-label-color;
+        text-transform: capitalize;
+      }
+
+      .sensorLocation {
+        font-size: 13px;
+        color: $soft-gray-darker;
+      }
+    }
+  }
+
+  .reading {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+
+    .readingValue {
+      font-size: 32px;
+      font-weight: 500;
+      line-height: 1;
+      color: $gray-label-color;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .readingUnit {
+      font-size: 13px;
+      color: $soft-gray-darker;
+    }
+  }
+
+  .chartArea {
+    position: relative;
+    height: 220px;
+
+    .emptyState {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 16px;
+      font-size: 13px;
+      text-align: center;
+      color: $soft-gray-darker;
+      pointer-events: none;
+    }
+  }
+
+  :global(body.darkTheme) & {
+    .cardHeader .identity {
+      .sensorName {
+        color: $dark-text;
+      }
+
+      .sensorLocation {
+        color: $dark-text-muted;
+      }
+    }
+
+    .reading {
+      .readingValue {
+        color: $dark-text;
+      }
+
+      .readingUnit {
+        color: $dark-text-muted;
+      }
+    }
+
+    .chartArea .emptyState {
+      color: $dark-text-muted;
+    }
+  }
+}

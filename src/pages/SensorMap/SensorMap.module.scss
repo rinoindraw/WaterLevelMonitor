@@ -1,0 +1,148 @@
+@use "variables" as *;
+@use "mixins" as *;
+
+.sensorMap {
+  position: relative;
+  height: 100%;
+
+  .map {
+    width: 100%;
+    height: 100%;
+  }
+
+  // [NEW] Status muat di atas-tengah peta
+  .mapStatus {
+    @include panel-card;
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    z-index: 1000;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 14px;
+    font-size: 13px;
+    white-space: nowrap;
+    color: $gray-label-color;
+    transform: translateX(-50%);
+
+    .mapStatusIcon {
+      font-size: 16px;
+      color: $status-critical;
+    }
+  }
+
+  .mapLegend {
+    @include panel-card;
+    position: absolute;
+    left: 12px;
+    bottom: 24px;
+    z-index: 1000;
+    gap: 6px;
+    padding: 10px 12px;
+
+    .legendTitle {
+      font-size: 12px;
+      font-weight: 500;
+      color: $gray-label-color;
+      text-transform: capitalize;
+    }
+
+    .legendItem {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: $soft-gray-darker;
+
+      .legendDot {
+        width: 12px;
+        height: 12px;
+        border: 2px solid $white-color;
+        border-radius: 50%;
+        box-shadow: 0 0 0 1px rgba($black-color, 0.15);
+      }
+    }
+
+    // [NEW]
+    .legendNote {
+      max-width: 160px;
+      margin-top: 2px;
+      font-size: 11px;
+      color: $soft-gray-darker;
+    }
+  }
+
+  // Popup dirender Leaflet di dalam kontainer peta, jadi tetap di bawah .sensorMap
+  .popup {
+    min-width: 240px; // [CHANGED] dulu 200 — kini memuat tiga baris sensor
+    padding: 12px 14px;
+
+    .popupTitle {
+      font-size: 14px;
+      font-weight: 500;
+      text-transform: capitalize;
+    }
+
+    // [CHANGED] dulu .popupLocation
+    .popupCoordinates {
+      margin-bottom: 10px;
+      font-size: 12px;
+      color: $soft-gray-darker;
+      font-variant-numeric: tabular-nums;
+    }
+
+    // [NEW] menggantikan .popupStats — satu baris per sensor
+    .popupSensors {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      list-style: none;
+
+      .popupSensor {
+        display: grid;
+        grid-template-columns: 1fr auto auto;
+        align-items: center;
+        gap: 12px;
+        font-size: 12px;
+
+        .popupSensorName {
+          color: $soft-gray-darker;
+        }
+
+        .popupSensorDistance {
+          font-weight: 500;
+          font-variant-numeric: tabular-nums;
+        }
+      }
+    }
+  }
+
+  :global(body.darkTheme) & {
+    .mapStatus {
+      color: $dark-text;
+    }
+
+    .mapLegend {
+      .legendTitle {
+        color: $dark-text;
+      }
+
+      .legendItem,
+      .legendNote {
+        color: $dark-text-muted;
+
+        .legendDot {
+          border-color: $dark-color-two;
+        }
+      }
+    }
+
+    .popup {
+      .popupCoordinates,
+      .popupSensors .popupSensor .popupSensorName {
+        color: $dark-text-muted;
+      }
+    }
+  }
+}
