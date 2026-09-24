@@ -30,6 +30,10 @@
       position: relative;
       height: 300px;
 
+      @media (max-width: $bp-mobile) {
+        height: 240px;
+      }
+
       .emptyState {
         position: absolute;
         inset: 0;

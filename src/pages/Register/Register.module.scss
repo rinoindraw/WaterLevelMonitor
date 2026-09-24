@@ -1,0 +1,6 @@
+@use "mixins" as *;
+
+// Seluruh gaya ada di mixin auth-screen, dipakai bersama halaman Masuk.
+.register {
+  @include auth-screen;
+}

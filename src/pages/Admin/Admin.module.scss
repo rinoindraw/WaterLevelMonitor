@@ -1,0 +1,22 @@
+@use "mixins" as *;
+@use "responsive" as *;
+
+// Kerangka + sub-tab. Gaya isi ada di AdminUsers.module.scss dan
+// AdminSettings.module.scss.
+.admin {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 20px 24px 24px;
+
+  .subTabs {
+    @include sub-tabs;
+  }
+
+  @media (max-width: $bp-mobile) {
+    padding: 16px;
+  }
+}

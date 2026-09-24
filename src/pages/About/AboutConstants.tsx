@@ -8,14 +8,27 @@ export interface SummaryItem {
   value: string;
 }
 
+// [NEW] Sub-tab di atas halaman Tentang. `end` hanya untuk tab indeks,
+// supaya "Sistem" tidak ikut aktif saat sub-tab lain terbuka.
+export interface AboutTab {
+  label: string;
+  path: string;
+  end?: boolean;
+}
+
+export const ABOUT_TABS: AboutTab[] = [
+  { label: "Sistem", path: "/about", end: true },
+  { label: "Profil", path: "/about/profil" },
+];
+
 export interface SystemFeature {
   title: string;
   description: string;
   path: string; // tab tujuan saat kartu diklik
 }
 
-// Baris "Ambang status" tidak di sini — dirender di About.tsx dari
-// ALERT_THRESHOLD_CM / DANGER_THRESHOLD_CM supaya selalu sama dengan grafik.
+// Baris "Ambang tinggi air" tidak di sini — dirender di AboutSystem.tsx dari
+// ThresholdStore supaya selalu sama dengan pita di grafik dan dengan ESP32.
 export const SYSTEM_SUMMARY: SummaryItem[] = [
   { label: "Controller", value: "ESP32 dengan layar OLED di lokasi" },
   { label: "Sensor", value: "3 sensor ultrasonik HC-SR04: kiri, tengah, kanan" },

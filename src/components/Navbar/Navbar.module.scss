@@ -121,6 +121,36 @@
       }
     }
 
+    // [NEW] Email akun yang sedang masuk + penanda perannya.
+    .account {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+
+      .roleBadge {
+        flex-shrink: 0;
+        padding: 3px 9px;
+        font-size: 11px;
+        font-weight: 500;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        border-radius: 999px;
+        color: $primary-color-alt-two;
+        background: rgba($primary-color-alt-three, 0.14);
+        border: 1px solid rgba($primary-color-alt-three, 0.28);
+      }
+    }
+
+    .user {
+      max-width: 180px;
+      overflow: hidden;
+      font-size: 13px;
+      color: $soft-gray-darker;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
     .themeToggle {
       display: flex;
       align-items: center;
@@ -152,12 +182,46 @@
     .brand .title {
       display: none;
     }
+
+    // Emailnya disembunyikan, penanda Admin tetap terlihat
+    .actions .account .user {
+      display: none;
+    }
   }
 
   @media (max-width: $bp-mobile) {
+    gap: 8px;
+    padding: 0 12px;
+
     .navLinks .navLink span,
     .actions .connection .connectionLabel {
       display: none;
+    }
+
+    // Tanpa label, tautan tinggal ikon — paddingnya ikut dikecilkan supaya
+    // empat tautan + tombol masih muat di layar 360px tanpa menggeser navbar.
+    .navLinks .navLink {
+      padding: 0 10px;
+
+      &::after {
+        left: 8px;
+        right: 8px;
+      }
+    }
+
+    .actions {
+      gap: 8px;
+
+      // Perannya sudah tertandai tab Admin yang hanya muncul untuk admin
+      .account {
+        display: none;
+      }
+
+      .themeToggle {
+        width: 32px;
+        height: 32px;
+        font-size: 16px;
+      }
     }
   }
 
@@ -195,6 +259,16 @@
         &.offline {
           color: $soft-red-color-alt-three;
         }
+      }
+
+      .account .roleBadge {
+        color: $primary-color-alt-four;
+        background: rgba($primary-color-alt-four, 0.16);
+        border-color: rgba($primary-color-alt-four, 0.3);
+      }
+
+      .user {
+        color: $dark-text-muted;
       }
 
       .themeToggle {

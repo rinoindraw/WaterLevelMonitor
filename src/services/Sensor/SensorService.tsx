@@ -1,6 +1,9 @@
-import { initializeApp } from "firebase/app";
 import { getDatabase, onValue, ref } from "firebase/database";
-import type { SensorStatus } from "../../utils/constants/MonitorConstants";
+import {
+  SENSORS,
+  type SensorStatus,
+} from "../../utils/constants/MonitorConstants";
+import { firebaseApp } from "../Firebase/FirebaseApp";
 
 // Bentuk node yang ditulis ESP32 lewat kirimFirebase(). Nama field berasal
 // dari firmware, jadi dibiarkan apa adanya.
@@ -11,21 +14,40 @@ export interface SensorNodeResponse {
 
 export type SensorSnapshotResponse = Partial<Record<string, SensorNodeResponse>>;
 
-// [CHANGED] Dulu GET REST tiap 3 detik, sekarang listener realtime.
-// Rules DB publik (ESP32 menulis tanpa auth), jadi cukup databaseURL.
-// [CONFIG] URL database → VITE_FIREBASE_URL di .env
-const firebaseApp = initializeApp({
-  databaseURL: import.meta.env.VITE_FIREBASE_URL,
-});
+// [CHANGED] initializeApp pindah ke FirebaseApp.tsx supaya app-nya sama dengan
+// yang dipakai Auth — koneksi database ikut membawa sesi login.
+// Jalur tulis sengaja tetap terbuka: ESP32 mengirim data tanpa token.
 const database = getDatabase(firebaseApp);
 
 export const SensorService = {
-  // Callback dipanggil sekali untuk isi awal, lalu HANYA saat data berubah.
-  // Mengembalikan fungsi unsubscribe.
+  // [CHANGED] Dulu satu listener di root. Root tidak lagi boleh dibaca sejak
+  // node users & admins ada di sana — izin baca turun ke anaknya, jadi
+  // pembaca root otomatis ikut bisa membaca daftar pengguna. Sekarang satu
+  // listener per sensor, dan snapshot gabungannya dirakit di sini.
+  //
+  // Callback dipanggil sekali untuk isi awal tiap sensor, lalu setiap kali
+  // salah satu berubah. Mengembalikan fungsi unsubscribe.
   subscribeSnapshot: (
     onData: (snapshot: SensorSnapshotResponse) => void,
     onError: (error: Error) => void,
-  ) => onValue(ref(database), (snap) => onData(snap.val() ?? {}), onError),
+  ) => {
+    const snapshot: SensorSnapshotResponse = {};
+
+    const unsubscribes = SENSORS.map((sensor) =>
+      onValue(
+        ref(database, sensor.id),
+        (snap) => {
+          snapshot[sensor.id] = snap.val() ?? undefined;
+          // Selalu kirim salinan: pemanggil membandingkan isinya, bukan
+          // identitas objeknya.
+          onData({ ...snapshot });
+        },
+        onError,
+      ),
+    );
+
+    return () => unsubscribes.forEach((unsubscribe) => unsubscribe());
+  },
 
   // Node bawaan Firebase: true saat socket ke server tersambung.
   subscribeConnection: (onChange: (isConnected: boolean) => void) =>

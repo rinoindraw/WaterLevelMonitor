@@ -21,8 +21,9 @@ const Dashboard = ({ connection }: DashboardProps) => {
         <h1 className={styles.pageTitle}>Tinggi Muka Air</h1>
         <p className={styles.pageDescription}>
           Pantau ketinggian air di stasiun secara langsung dari tiga sensor.
-          Semakin tinggi garisnya, semakin dekat air ke sensor. Pita kuning dan
-          merah menandai kapan kondisi masuk SIAGA atau BAHAYA.
+          Garisnya menunjukkan tinggi air diukur dari dasar, jadi garis naik
+          berarti air naik. Pita kuning dan merah menandai kapan kondisi masuk
+          SIAGA atau BAHAYA.
         </p>
       </header>
 

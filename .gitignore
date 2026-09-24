@@ -1,3 +1,7 @@
 node_modules
 dist
 .env
+admins.json
+database.rules.json
+admins-node.json
+.DS_Store

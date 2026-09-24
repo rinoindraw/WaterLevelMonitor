@@ -1,0 +1,220 @@
+@use "variables" as *;
+@use "responsive" as *;
+
+.artwork {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 28px;
+  overflow: hidden;
+  color: $white-color;
+  background:
+    radial-gradient(120% 80% at 10% 0%, rgba($primary-color-alt-four, 0.45), transparent 60%),
+    linear-gradient(160deg, $primary-color-alt-two, #1e2a63 70%, #131a3c);
+
+  .copy {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    .eyebrow {
+      margin: 0;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: rgba($white-color, 0.7);
+    }
+
+    .headline {
+      margin: 0;
+      font-size: 26px;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
+    .subline {
+      margin: 0;
+      max-width: 34ch;
+      font-size: 13px;
+      line-height: 1.6;
+      color: rgba($white-color, 0.75);
+    }
+  }
+
+  // ===== Papan duga =====
+  .gauge {
+    position: relative;
+    flex: 1;
+    min-height: 240px;
+    border-radius: 12px;
+    background: rgba($black-color, 0.18);
+    border: 1px solid rgba($white-color, 0.12);
+    overflow: hidden;
+
+    .sensors {
+      position: absolute;
+      inset: 0 0 auto 0;
+      z-index: 3;
+      display: flex;
+      justify-content: space-around;
+      padding-top: 10px;
+
+      .sensor {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+
+        .sensorBody {
+          width: 16px;
+          height: 8px;
+          border-radius: 2px;
+        }
+
+        // Pancaran sensor, sama idenya dengan garis putus-putus di grafik
+        .beam {
+          width: 0;
+          height: 150px;
+          border-left: 1.5px dashed rgba($white-color, 0.35);
+        }
+      }
+    }
+
+    // Garis ambang mendatar + labelnya
+    .mark {
+      position: absolute;
+      left: 0;
+      right: 0;
+      z-index: 3;
+      height: 0;
+      border-top: 1px dashed;
+
+      .markLabel {
+        position: absolute;
+        top: -14px;
+        left: 10px;
+        font-size: 9px;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+      }
+
+      &.danger {
+        top: 34%;
+        border-color: rgba($status-critical, 0.9);
+
+        .markLabel {
+          color: rgba($status-critical, 0.95);
+        }
+      }
+
+      &.alert {
+        top: 52%;
+        border-color: rgba($status-warning, 0.9);
+
+        .markLabel {
+          color: rgba($status-warning, 0.95);
+        }
+      }
+    }
+
+    // Air: tingginya berubah perlahan, melewati kedua garis ambang
+    .water {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 2;
+      height: 34%;
+      background: linear-gradient(
+        180deg,
+        rgba(96, 165, 250, 0.55),
+        rgba(37, 99, 235, 0.75)
+      );
+      animation: pasang 11s ease-in-out infinite alternate;
+
+      // Permukaan bergelombang: dua lapis dengan kecepatan berbeda supaya
+      // terasa ada kedalaman, bukan satu garis yang bergeser.
+      .wave {
+        position: absolute;
+        left: -50%;
+        top: -10px;
+        width: 200%;
+        height: 20px;
+        border-radius: 45%;
+        background: rgba(191, 219, 254, 0.55);
+        animation: riak 7s linear infinite;
+      }
+
+      .waveBack {
+        top: -14px;
+        background: rgba(147, 197, 253, 0.35);
+        animation-duration: 11s;
+        animation-direction: reverse;
+      }
+    }
+
+    .ruler {
+      position: absolute;
+      top: 12px;
+      bottom: 12px;
+      right: 10px;
+      z-index: 3;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: flex-end;
+
+      .tick {
+        width: 10px;
+        height: 1px;
+        background: rgba($white-color, 0.35);
+
+        // Tiap garis kedua dibuat panjang, seperti penggaris sungguhan
+        &:nth-child(2n) {
+          width: 18px;
+        }
+      }
+    }
+  }
+
+  // Gerakan hanya sebagai bumbu — dimatikan kalau user memintanya
+  @media (prefers-reduced-motion: reduce) {
+    .gauge {
+      .water {
+        animation: none;
+        height: 44%;
+
+        .wave {
+          animation: none;
+        }
+      }
+    }
+  }
+
+  // Di layar sempit, kartu formnya yang harus dapat seluruh ruang
+  @media (max-width: $bp-tablet) {
+    display: none;
+  }
+}
+
+@keyframes pasang {
+  0% {
+    height: 26%;
+  }
+  100% {
+    height: 62%;
+  }
+}
+
+@keyframes riak {
+  0% {
+    transform: translateX(0) rotate(0deg);
+  }
+  100% {
+    transform: translateX(25%) rotate(2deg);
+  }
+}

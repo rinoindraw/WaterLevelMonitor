@@ -1,5 +1,6 @@
 @use "variables" as *;
 @use "mixins" as *;
+@use "responsive" as *;
 
 .sensorMap {
   position: relative;
@@ -26,6 +27,14 @@
     color: $gray-label-color;
     transform: translateX(-50%);
 
+    // Di ponsel kalimatnya lebih panjang daripada lebar layar, jadi
+    // nowrap-nya dilepas dan kartunya dibatasi lebar layar.
+    @media (max-width: $bp-mobile) {
+      max-width: calc(100vw - 24px);
+      white-space: normal;
+      text-align: center;
+    }
+
     .mapStatusIcon {
       font-size: 16px;
       color: $status-critical;
@@ -40,6 +49,15 @@
     z-index: 1000;
     gap: 6px;
     padding: 10px 12px;
+
+    // Legenda tidak boleh memakan peta di layar kecil
+    @media (max-width: $bp-mobile) {
+      left: 8px;
+      bottom: 8px;
+      gap: 4px;
+      padding: 8px 10px;
+      font-size: 11px;
+    }
 
     .legendTitle {
       font-size: 12px;
@@ -61,6 +79,14 @@
         border: 2px solid $white-color;
         border-radius: 50%;
         box-shadow: 0 0 0 1px rgba($black-color, 0.15);
+      }
+
+      // [NEW] Lingkaran kecil, meniru area terdampak di peta
+      .legendArea {
+        width: 12px;
+        height: 12px;
+        border: 1.5px solid;
+        border-radius: 50%;
       }
     }
 

@@ -3,6 +3,7 @@ import { useMemo } from "react";
 import EChart from "../../../../components/EChart/EChart";
 import { getChartTheme } from "../../../../helpers/Chart/ChartTheme";
 import type { SensorSample } from "../../../../stores/Sensor/SensorStore";
+import { UseThresholdStore } from "../../../../stores/Settings/ThresholdStore";
 import { UseThemeStore } from "../../../../stores/Theme/ThemeStore";
 import {
   OBJECT_PREDICTIONS,
@@ -15,9 +16,12 @@ interface DashboardObjectProfileProps {
 }
 
 // Profil objek dari snapshot TERAKHIR: Sensor 1 di kiri, Sensor 3 di kanan
-// (urutan SENSORS). Tinggi = emptyDistanceCm − jarak terbaca, minimal 0.
+// (urutan SENSORS). Tinggi dari dasar = jarak sensor ke dasar − jarak terbaca.
+// [CHANGED] Angka kalibrasinya kini dari Firebase, bukan emptyDistanceCm yang
+// dipaku di kode — sama persis dengan yang dipakai menghitung tinggi air.
 const DashboardObjectProfile = ({ samples }: DashboardObjectProfileProps) => {
   const isDarkMode = UseThemeStore((state) => state.isDarkMode);
+  const mountHeights = UseThresholdStore((state) => state.sensorHeights);
   const latestSample = samples.at(-1);
 
   const { heights, option } = useMemo(() => {
@@ -25,13 +29,15 @@ const DashboardObjectProfile = ({ samples }: DashboardObjectProfileProps) => {
     const sensorHeights = SENSORS.map((sensor) => {
       const reading = latestSample?.readings[sensor.id];
       return reading
-        ? Math.round(Math.max(0, sensor.emptyDistanceCm - reading.distanceCm) * 10) / 10
+        ? Math.round(
+            Math.max(0, mountHeights[sensor.id] - reading.distanceCm) * 10,
+          ) / 10
         : null;
     });
 
-    // [NEW] Pancaran sensor: garis putus-putus dari posisi pemasangan
-    // (y = emptyDistanceCm) turun ke permukaan yang terbaca. Panjangnya =
-    // jarak terbaca. Kotak kecil di pangkal = sensornya.
+    // Pancaran sensor: garis putus-putus dari posisi pemasangan (y = jarak
+    // sensor ke dasar) turun ke permukaan yang terbaca. Panjangnya = jarak
+    // terbaca. Kotak kecil di pangkal = sensornya.
     const beamLines: MarkLineComponentOption["data"] = sensorHeights.flatMap(
       (height, index) => {
         if (height === null) return [];
@@ -40,7 +46,7 @@ const DashboardObjectProfile = ({ samples }: DashboardObjectProfileProps) => {
           [
             {
               xAxis: sensor.name,
-              yAxis: sensor.emptyDistanceCm,
+              yAxis: mountHeights[sensor.id],
               lineStyle: {
                 color: isDarkMode ? sensor.colorDark : sensor.color,
                 type: "dashed",
@@ -79,14 +85,15 @@ const DashboardObjectProfile = ({ samples }: DashboardObjectProfileProps) => {
       },
       yAxis: {
         type: "value",
-        name: "Tinggi (cm)", // [CHANGED]
+        name: "Tinggi dari dasar (cm)",
         nameTextStyle: { color: ct.labelMuted, align: "left" },
         min: 0,
         // Ruang ~15% di atas tinggi maksimum supaya label nilai di puncak
         // dan kotak sensor tidak menimpa angka sumbu teratas
         max:
           Math.ceil(
-            (Math.max(...SENSORS.map((sensor) => sensor.emptyDistanceCm)) * 1.15) / 10,
+            (Math.max(...SENSORS.map((sensor) => mountHeights[sensor.id])) * 1.15) /
+              10,
           ) * 10,
         axisLabel: { color: ct.labelMuted },
         splitLine: { lineStyle: { color: ct.splitLine } },
@@ -94,7 +101,7 @@ const DashboardObjectProfile = ({ samples }: DashboardObjectProfileProps) => {
       series: [
         {
           type: "line",
-          name: "Tinggi objek", // [CHANGED]
+          name: "Tinggi dari dasar",
           smooth: 0.4,
           symbol: "circle",
           symbolSize: 10,
@@ -132,7 +139,7 @@ const DashboardObjectProfile = ({ samples }: DashboardObjectProfileProps) => {
     };
 
     return { heights: sensorHeights, option: chartOption };
-  }, [latestSample, isDarkMode]);
+  }, [latestSample, isDarkMode, mountHeights]);
 
   // Prediksi hanya kalau ketiga sensor ada — bentuk dari 2 titik tidak berarti
   const hasAllReadings = heights.every((height) => height !== null);
@@ -156,8 +163,8 @@ const DashboardObjectProfile = ({ samples }: DashboardObjectProfileProps) => {
         <h2 className={styles.cardTitle}>Prediksi objek</h2>
         <p className={styles.cardDescription}>
           Lihat bentuk permukaan di bawah ketiga sensor dan prediksi apakah itu
-          air naik atau tumpukan sampah. Garis putus-putus menunjukkan pancaran
-          tiap sensor.
+          air naik atau tumpukan sampah. Tingginya diukur dari dasar, dan garis
+          putus-putus menunjukkan pancaran tiap sensor.
         </p>
       </header>
 
@@ -177,7 +184,7 @@ const DashboardObjectProfile = ({ samples }: DashboardObjectProfileProps) => {
               "Prediksi butuh bacaan dari ketiga sensor."}
           </p>
           <dl className={styles.predictionStats}>
-            <dt>Tinggi puncak</dt>
+            <dt>Tertinggi dari dasar</dt>
             <dd>{peakCm === null ? "—" : `${peakCm.toFixed(1)} cm`}</dd>
             <dt>Ketidakrataan</dt>
             <dd>{spreadCm === null ? "—" : `${spreadCm.toFixed(1)} cm`}</dd>

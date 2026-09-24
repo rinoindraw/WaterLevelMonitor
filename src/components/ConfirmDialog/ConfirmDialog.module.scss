@@ -1,0 +1,133 @@
+@use "variables" as *;
+@use "responsive" as *;
+
+.dialog {
+  padding: 0;
+  border: none;
+  background: transparent;
+
+  &::backdrop {
+    background: rgba($black-color, 0.45);
+    backdrop-filter: blur(2px);
+  }
+
+  .content {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: min(380px, calc(100vw - 32px));
+    padding: 22px;
+    background: $surface-color;
+    border: 1px solid $soft-gray-darker-alt;
+    border-radius: 12px;
+    box-shadow: 0 18px 40px rgba($black-color, 0.18);
+
+    .icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      font-size: 20px;
+      border-radius: 10px;
+      color: $primary-color-alt-two;
+      background: rgba($primary-color-alt-three, 0.14);
+    }
+
+    .title {
+      margin: 0;
+      font-size: 17px;
+      font-weight: 600;
+      color: $gray-label-color;
+      text-transform: capitalize;
+    }
+
+    .description {
+      margin: 0;
+      font-size: 13px;
+      line-height: 1.6;
+      color: $soft-gray-darker;
+    }
+
+    .actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 8px;
+
+      button {
+        height: 38px;
+        padding: 0 18px;
+        font-size: 14px;
+        font-weight: 500;
+        border-radius: 8px;
+        cursor: pointer;
+        text-transform: capitalize;
+
+        &:focus-visible {
+          outline: 2px solid $primary-color-alt-three;
+          outline-offset: 2px;
+        }
+      }
+
+      .cancel {
+        color: $gray-label-color;
+        background: transparent;
+        border: 1px solid $soft-gray-darker-alt;
+
+        &:hover {
+          border-color: $primary-color-alt-four;
+        }
+      }
+
+      .confirm {
+        color: $surface-color;
+        background: $status-critical;
+        border: none;
+
+        &:hover {
+          background: $red-color-darker;
+        }
+      }
+
+      @media (max-width: $bp-mobile) {
+        flex-direction: column-reverse;
+
+        button {
+          width: 100%;
+        }
+      }
+    }
+  }
+
+  :global(body.darkTheme) & {
+    .content {
+      background: $dark-color-two;
+      border-color: $dark-border;
+
+      .icon {
+        color: $primary-color-alt-four;
+        background: rgba($primary-color-alt-four, 0.16);
+      }
+
+      .title {
+        color: $dark-text;
+      }
+
+      .description {
+        color: $dark-text-muted;
+      }
+
+      .actions {
+        .cancel {
+          color: $dark-text;
+          border-color: $dark-border;
+        }
+
+        .confirm {
+          color: $dark-text;
+        }
+      }
+    }
+  }
+}

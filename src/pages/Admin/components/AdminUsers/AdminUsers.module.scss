@@ -1,0 +1,182 @@
+@use "variables" as *;
+@use "mixins" as *;
+@use "responsive" as *;
+
+// Isi sub-tab "Pengguna". Lebar & padding halaman diatur .admin di induknya.
+.users {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  .pageHeader {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+
+    .pageTitle {
+      font-size: 18px;
+      font-weight: 500;
+      color: $gray-label-color;
+      text-transform: capitalize;
+    }
+
+    .pageDescription {
+      max-width: 72ch;
+      font-size: 13px;
+      color: $soft-gray-darker;
+    }
+  }
+
+  .notice {
+    font-size: 13px;
+    color: $soft-gray-darker;
+  }
+
+  .tableCard {
+    @include panel-card;
+
+    gap: 0;
+    padding: 0;
+    overflow: hidden;
+
+    .tableHeader {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      font-size: 12px;
+      color: $soft-gray-darker;
+      border-bottom: 1px solid $soft-gray-darker-alt;
+
+      svg {
+        font-size: 15px;
+        color: $primary-color-alt-two;
+      }
+    }
+
+    // Tabel tidak dipaksa menyusut di layar sempit — digeser saja.
+    .tableScroll {
+      overflow-x: auto;
+
+      .table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+
+        th {
+          padding: 8px 14px;
+          font-weight: 500;
+          text-align: left;
+          white-space: nowrap;
+          color: $soft-gray-darker;
+          background: $main-background-color;
+        }
+
+        td {
+          padding: 9px 14px;
+          white-space: nowrap;
+          color: $gray-label-color;
+          border-top: 1px solid $soft-gray-darker-alt;
+        }
+
+        .self {
+          margin-left: 6px;
+          padding: 1px 7px;
+          font-size: 11px;
+          font-weight: 500;
+          border-radius: 999px;
+          color: $primary-color-alt-two;
+          background: rgba($primary-color-alt-three, 0.14);
+        }
+
+        .presence {
+          display: inline-flex;
+          align-items: center;
+          gap: 7px;
+
+          .presenceDot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: $gray-color-lighter;
+          }
+
+          &.online {
+            color: $green-color-darker;
+
+            .presenceDot {
+              background: $status-good;
+            }
+          }
+
+          &.offline {
+            color: $soft-gray-darker;
+          }
+        }
+      }
+    }
+  }
+
+  @media (max-width: $bp-mobile) {
+    .tableCard .tableScroll .table {
+      th,
+      td {
+        padding: 8px 12px;
+      }
+    }
+  }
+
+  :global(body.darkTheme) & {
+    .pageHeader {
+      .pageTitle {
+        color: $dark-text;
+      }
+
+      .pageDescription {
+        color: $dark-text-muted;
+      }
+    }
+
+    .notice {
+      color: $dark-text-muted;
+    }
+
+    .tableCard {
+      .tableHeader {
+        color: $dark-text-muted;
+        border-bottom-color: $dark-border;
+
+        svg {
+          color: $primary-color-alt-four;
+        }
+      }
+
+      .tableScroll .table {
+        th {
+          color: $dark-text-muted;
+          background: $dark-color-one;
+        }
+
+        td {
+          color: $dark-text;
+          border-top-color: $dark-border;
+        }
+
+        .self {
+          color: $primary-color-alt-four;
+          background: rgba($primary-color-alt-four, 0.16);
+        }
+
+        .presence {
+          &.online {
+            color: $green-color-alt;
+          }
+
+          &.offline {
+            color: $dark-text-muted;
+          }
+        }
+      }
+    }
+  }
+}

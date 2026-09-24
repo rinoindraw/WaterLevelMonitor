@@ -1,0 +1,171 @@
+@use "variables" as *;
+@use "mixins" as *;
+@use "responsive" as *;
+
+// Isi sub-tab "Sistem". Lebar & padding halaman diatur .about di induknya.
+.system {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  .pageHeader {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    .pageTitle {
+      font-size: 22px;
+      font-weight: 500;
+      color: $gray-label-color;
+      text-transform: capitalize;
+    }
+
+    .pageDescription {
+      max-width: 72ch;
+      font-size: 14px;
+      color: $soft-gray-darker;
+    }
+  }
+
+  .summaryCard {
+    @include panel-card;
+
+    .sectionTitle {
+      font-size: 16px;
+      font-weight: 500;
+      color: $gray-label-color;
+      text-transform: capitalize;
+    }
+
+    .summaryList {
+      display: flex;
+      flex-direction: column;
+
+      // Baris label | nilai, dipisah garis tipis
+      .summaryRow {
+        display: grid;
+        grid-template-columns: 160px 1fr;
+        gap: 16px;
+        padding: 10px 0;
+        font-size: 14px;
+        border-top: 1px solid $soft-gray-darker-alt;
+
+        dt {
+          color: $soft-gray-darker;
+        }
+
+        dd {
+          color: $gray-label-color;
+        }
+
+        .thresholds {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 8px 20px;
+
+          span {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+          }
+        }
+
+        @media (max-width: $bp-mobile) {
+          grid-template-columns: 1fr;
+          gap: 2px;
+        }
+      }
+    }
+  }
+
+  .featureGrid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+
+    .featureCard {
+      @include panel-card;
+      gap: 6px;
+      text-decoration: none;
+      transition: border-color 0.2s ease;
+
+      &:hover {
+        border-color: $primary-color-alt-four;
+      }
+
+      &:focus-visible {
+        outline: 2px solid $primary-color-alt-three;
+        outline-offset: 2px;
+      }
+
+      .featureIcon {
+        font-size: 20px;
+        color: $primary-color-alt-two;
+      }
+
+      .featureTitle {
+        font-size: 14px;
+        font-weight: 500;
+        color: $gray-label-color;
+        text-transform: capitalize;
+      }
+
+      .featureDescription {
+        font-size: 13px;
+        color: $soft-gray-darker;
+      }
+    }
+
+    @media (max-width: $bp-tablet) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  :global(body.darkTheme) & {
+    .pageHeader {
+      .pageTitle {
+        color: $dark-text;
+      }
+
+      .pageDescription {
+        color: $dark-text-muted;
+      }
+    }
+
+    .summaryCard {
+      .sectionTitle {
+        color: $dark-text;
+      }
+
+      .summaryList .summaryRow {
+        border-top-color: $dark-border;
+
+        dt {
+          color: $dark-text-muted;
+        }
+
+        dd {
+          color: $dark-text;
+        }
+      }
+    }
+
+    .featureGrid .featureCard {
+      &:hover {
+        border-color: $primary-color-alt-three;
+      }
+
+      .featureIcon {
+        color: $primary-color-alt-four;
+      }
+
+      .featureTitle {
+        color: $dark-text;
+      }
+
+      .featureDescription {
+        color: $dark-text-muted;
+      }
+    }
+  }
+}

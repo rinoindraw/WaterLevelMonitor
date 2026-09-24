@@ -1,4 +1,5 @@
 import {
+  Circle,
   CircleMarker,
   MapContainer,
   Popup,
@@ -10,10 +11,13 @@ import { LoadingSpinner } from "../../components/LoadingState/LoadingState"; // 
 import StatusChip from "../../components/StatusChip/StatusChip";
 import type { ConnectionState } from "../../hooks/Sensor/UseSensorRealtime"; // [NEW]
 import { UseSensorStore } from "../../stores/Sensor/SensorStore";
+import { UseThresholdStore } from "../../stores/Settings/ThresholdStore";
 import { UseThemeStore } from "../../stores/Theme/ThemeStore";
 import {
   DEVICE_LOCATION,
   DEVICE_NAME,
+  FLOOD_RADIUS_COLOR,
+  FLOOD_RADIUS_METERS,
   MAP_MAX_ZOOM,
   MAP_TILE_ATTRIBUTION,
   MAP_TILE_DARK_URL,
@@ -38,6 +42,7 @@ interface SensorMapProps {
 const SensorMap = ({ connection }: SensorMapProps) => {
   const isDarkMode = UseThemeStore((state) => state.isDarkMode);
   const latestSample = UseSensorStore((state) => state.samples.at(-1));
+  const mountHeights = UseThresholdStore((state) => state.sensorHeights);
 
   // [NEW] Satu marker untuk tiga sensor → ikut status TERBURUK, supaya satu
   // sensor BAHAYA tidak tersembunyi di balik dua yang NORMAL.
@@ -67,6 +72,22 @@ const SensorMap = ({ connection }: SensorMapProps) => {
           maxZoom={MAP_MAX_ZOOM}
         />
 
+        {/* [NEW] Perkiraan area terdampak di sekitar stasiun. Digambar
+            SEBELUM marker agar marker tetap berada di atasnya. */}
+        <Circle
+          center={DEVICE_LOCATION}
+          radius={FLOOD_RADIUS_METERS}
+          pathOptions={{
+            color: FLOOD_RADIUS_COLOR,
+            weight: 1.5,
+            opacity: 0.7,
+            fillColor: FLOOD_RADIUS_COLOR,
+            fillOpacity: 0.15,
+          }}
+        >
+          <Tooltip sticky>Perkiraan area terdampak</Tooltip>
+        </Circle>
+
         {/* [CHANGED] Satu marker untuk controller, bukan satu per sensor */}
         <CircleMarker
           center={DEVICE_LOCATION}
@@ -90,11 +111,16 @@ const SensorMap = ({ connection }: SensorMapProps) => {
               <ul className={styles.popupSensors}>
                 {SENSORS.map((sensor) => {
                   const reading = latestSample?.readings[sensor.id];
+                  // [CHANGED] Yang ditampilkan tinggi air dari dasar, sama
+                  // dengan grafik — bukan jarak mentah ke sensor.
+                  const levelCm = reading
+                    ? Math.max(0, mountHeights[sensor.id] - reading.distanceCm)
+                    : null;
                   return (
                     <li key={sensor.id} className={styles.popupSensor}>
                       <span className={styles.popupSensorName}>{sensor.name}</span>
                       <span className={styles.popupSensorDistance}>
-                        {reading ? `${reading.distanceCm.toFixed(1)} cm` : "—"}
+                        {levelCm === null ? "—" : `${levelCm.toFixed(1)} cm`}
                       </span>
                       <StatusChip status={reading?.status ?? null} />
                     </li>
@@ -139,6 +165,16 @@ const SensorMap = ({ connection }: SensorMapProps) => {
             style={{ backgroundColor: UNKNOWN_STATUS_COLOR }}
           />
           Tidak ada data
+        </p>
+        <p className={styles.legendItem}>
+          <span
+            className={styles.legendArea}
+            style={{
+              backgroundColor: `${FLOOD_RADIUS_COLOR}26`,
+              borderColor: FLOOD_RADIUS_COLOR,
+            }}
+          />
+          Perkiraan area terdampak
         </p>
         <p className={styles.legendNote}>
           Menampilkan kondisi terburuk dari ketiga sensor.

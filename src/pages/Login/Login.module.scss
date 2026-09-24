@@ -1,0 +1,6 @@
+@use "mixins" as *;
+
+// Seluruh gaya ada di mixin auth-screen, dipakai bersama halaman Daftar.
+.login {
+  @include auth-screen;
+}

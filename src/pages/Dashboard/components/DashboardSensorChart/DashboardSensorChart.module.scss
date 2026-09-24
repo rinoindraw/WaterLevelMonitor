@@ -1,5 +1,6 @@
 @use "variables" as *;
 @use "mixins" as *;
+@use "responsive" as *;
 
 .sensorCard {
   @include panel-card;
@@ -56,6 +57,12 @@
   .chartArea {
     position: relative;
     height: 220px;
+
+    // Tiga kartu bertumpuk di ponsel — tiap kartu dipendekkan supaya
+    // ketiganya tidak menuntut gulir sepanjang tiga layar penuh.
+    @media (max-width: $bp-mobile) {
+      height: 180px;
+    }
 
     .emptyState {
       position: absolute;

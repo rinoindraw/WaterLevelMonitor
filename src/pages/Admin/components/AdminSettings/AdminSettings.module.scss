@@ -1,0 +1,341 @@
+@use "variables" as *;
+@use "mixins" as *;
+@use "responsive" as *;
+
+// Isi sub-tab "Pengaturan sensor". Lebar & padding halaman diatur .admin
+// di induknya.
+.settings {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  .pageHeader {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+
+    .pageTitle {
+      font-size: 18px;
+      font-weight: 500;
+      color: $gray-label-color;
+      text-transform: capitalize;
+    }
+
+    .pageDescription {
+      max-width: 72ch;
+      font-size: 13px;
+      color: $soft-gray-darker;
+    }
+  }
+
+  .notice {
+    padding: 12px 14px;
+    font-size: 13px;
+    color: $yellow-color-darker;
+    background: $soft-yellow-color;
+    border: 1px solid $yellow-color-darker-alt;
+    border-radius: 8px;
+  }
+
+  .formCard {
+    @include panel-card;
+
+    gap: 14px;
+    padding: 16px 18px;
+
+    .fieldRow {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+
+      .field {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+
+        .fieldLabel {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          font-size: 14px;
+          font-weight: 500;
+          color: $gray-label-color;
+        }
+
+        .inputWrapper {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+
+          .input {
+            width: 110px;
+            padding: 8px 10px;
+            font-size: 14px;
+            color: $gray-label-color;
+            background: $surface-color;
+            border: 1px solid $soft-gray-darker-alt;
+            border-radius: 8px;
+
+            &:focus-visible {
+              outline: 2px solid $primary-color-alt-three;
+              outline-offset: -1px;
+            }
+
+            &:disabled {
+              cursor: not-allowed;
+              background: $white-color-alt;
+              color: $soft-gray-darker;
+            }
+          }
+
+          .unit {
+            font-size: 14px;
+            color: $soft-gray-darker;
+          }
+        }
+
+        .fieldHint {
+          font-size: 12px;
+          line-height: 1.5;
+          color: $soft-gray-darker;
+        }
+      }
+
+      @media (max-width: $bp-tablet) {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    // [NEW] Blok kalibrasi tinggi sensor
+    .calibration {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding-top: 12px;
+      border-top: 1px solid $soft-gray-darker-alt;
+
+      .sectionTitle {
+        margin: 0;
+        font-size: 14px;
+        font-weight: 500;
+        color: $gray-label-color;
+        text-transform: capitalize;
+      }
+
+      .sectionHint {
+        margin: 0;
+        max-width: 72ch;
+        font-size: 12px;
+        line-height: 1.5;
+        color: $soft-gray-darker;
+      }
+
+      .fieldRow {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .swatch {
+        @include swatch;
+      }
+    }
+
+    .preview {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      padding-top: 12px;
+      font-size: 13px;
+      color: $soft-gray-darker;
+      border-top: 1px solid $soft-gray-darker-alt;
+    }
+
+    .message {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 12px;
+      font-size: 13px;
+      border-radius: 8px;
+
+      &.error {
+        color: $red-color-darker;
+        background: $soft-red-color-lighter;
+        border: 1px solid $soft-red-color-alt-two;
+      }
+
+      &.success {
+        color: $green-color-darker;
+        background: $soft-green-lighter-alt-two;
+        border: 1px solid rgba($status-good, 0.3);
+      }
+    }
+
+    .formFooter {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+
+      .lastUpdate {
+        font-size: 12px;
+        color: $soft-gray-darker;
+      }
+
+      .submit {
+        min-width: 110px;
+        height: 36px;
+        font-size: 14px;
+        font-weight: 500;
+        color: $surface-color;
+        background: $primary-color-alt-two;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        text-transform: capitalize;
+
+        &:hover:not(:disabled) {
+          background: $primary-color-alt-three;
+        }
+
+        &:disabled {
+          cursor: not-allowed;
+          opacity: 0.55;
+        }
+
+        &:focus-visible {
+          outline: 2px solid $primary-color-alt-three;
+          outline-offset: 2px;
+        }
+      }
+    }
+  }
+
+  .deviceNote {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: $soft-gray-darker;
+
+    svg {
+      flex-shrink: 0;
+      font-size: 16px;
+      color: $primary-color-alt-two;
+    }
+  }
+
+  @media (max-width: $bp-mobile) {
+    .formCard .fieldRow .field .inputWrapper .input {
+      width: 100%;
+    }
+
+    .formCard .formFooter {
+      .submit {
+        width: 100%;
+      }
+    }
+  }
+
+  :global(body.darkTheme) & {
+    .pageHeader {
+      .pageTitle {
+        color: $dark-text;
+      }
+
+      .pageDescription {
+        color: $dark-text-muted;
+      }
+    }
+
+    .notice {
+      color: $yellow-color-darker-alt;
+      background: rgba($status-warning, 0.12);
+      border-color: rgba($status-warning, 0.35);
+    }
+
+    .formCard {
+      .fieldRow .field {
+        .fieldLabel {
+          color: $dark-text;
+        }
+
+        .inputWrapper {
+          .input {
+            color: $dark-text;
+            background: $dark-color-one;
+            border-color: $dark-border;
+
+            &:disabled {
+              background: $dark-color-one;
+              color: $dark-text-muted;
+            }
+          }
+
+          .unit {
+            color: $dark-text-muted;
+          }
+        }
+
+        .fieldHint {
+          color: $dark-text-muted;
+        }
+      }
+
+      .calibration {
+        border-top-color: $dark-border;
+
+        .sectionTitle {
+          color: $dark-text;
+        }
+
+        .sectionHint {
+          color: $dark-text-muted;
+        }
+      }
+
+      .preview {
+        color: $dark-text-muted;
+        border-top-color: $dark-border;
+      }
+
+      .message {
+        &.error {
+          color: $soft-red-color-alt-three;
+          background: rgba($status-critical, 0.12);
+          border-color: rgba($status-critical, 0.35);
+        }
+
+        &.success {
+          color: $green-color-alt;
+          background: rgba($status-good, 0.12);
+          border-color: rgba($status-good, 0.3);
+        }
+      }
+
+      .formFooter {
+        .lastUpdate {
+          color: $dark-text-muted;
+        }
+
+        .submit {
+          color: $dark-color-one;
+          background: $primary-color-alt-four;
+
+          &:hover:not(:disabled) {
+            background: $primary-color-alt-three;
+          }
+        }
+      }
+    }
+
+    .deviceNote {
+      color: $dark-text-muted;
+
+      svg {
+        color: $primary-color-alt-four;
+      }
+    }
+  }
+}

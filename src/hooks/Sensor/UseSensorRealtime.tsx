@@ -41,6 +41,12 @@ export const UseSensorRealtime = (): ConnectionState => {
               readings[sensor.id] = { distanceCm: node.jarak_cm, status: node.status };
             }
           }
+          // [NEW] Node sensor yang belum ada tetap mengirim event bernilai
+          // null. Tanpa penjaga ini, snapshot kosong ikut tercatat sebagai
+          // titik dan spinner "menunggu data pertama" hilang sebelum
+          // waktunya — yang tampil grafik kosong.
+          if (Object.keys(readings).length === 0) return;
+
           appendSample({ time: Date.now(), readings });
         }, SNAPSHOT_SETTLE_MS);
       },

@@ -12,7 +12,8 @@ export interface SensorConfig {
   id: SensorId; // nama node di Firebase = argumen sensorId di kirimFirebase()
   name: string;
   location: string; // [CHANGED] posisi di controller (kiri/tengah/kanan), bukan titik peta
-  emptyDistanceCm: number;
+  // [CHANGED] emptyDistanceCm dihapus — jarak sensor ke dasar kini per sensor
+  // di Firebase (pengaturan/tinggi_sensor), lihat DEFAULT_SENSOR_HEIGHT_CM
   color: string; // warna seri di mode terang
   colorDark: string; // warna seri yang sama, disetel untuk latar gelap
   // [CHANGED] lat & lng dihapus — lokasi kini satu, di DEVICE_LOCATION
@@ -50,19 +51,30 @@ export const SNAPSHOT_SETTLE_MS = 1000;
 export const CONNECTION_TIMEOUT_MS = 10000;
 
 // ===== [CONFIG] Ambang status =====
-// HARUS sama dengan BATAS_SIAGA & BATAS_BAHAYA di .ino. Di web angka ini hanya
-// dipakai untuk menggambar pita ambang di chart.
-export const ALERT_THRESHOLD_CM = 50;
-export const DANGER_THRESHOLD_CM = 30;
+// [CHANGED] Ambang kini dinyatakan sebagai TINGGI AIR dari dasar, bukan jarak
+// sensor ke permukaan. Air makin tinggi = makin gawat, jadi BAHAYA > SIAGA.
+//
+//   tinggi air = tinggi sensor ke dasar − jarak terbaca
+//
+// Angka aktifnya ada di Firebase (node `pengaturan`), diubah dari halaman
+// Pengaturan Sensor. Nilai di bawah hanya cadangan: dipakai sebelum node
+// terbaca atau kalau node itu belum pernah diisi.
+export const DEFAULT_ALERT_THRESHOLD_CM = 80; // air >= ini → SIAGA
+export const DEFAULT_DANGER_THRESHOLD_CM = 120; // air >= ini → BAHAYA
+
+// [NEW] Jarak sensor ke DASAR saat kering, per sensor. Ini angka kalibrasi:
+// diukur sekali di lapangan dan disimpan di Firebase. Salah ukur = seluruh
+// tinggi air ikut salah tanpa gejala.
+export const DEFAULT_SENSOR_HEIGHT_CM = 200;
+
+// Batas yang masuk akal untuk HC-SR04 (jangkauan 2–400 cm). Dipakai form dan
+// dicerminkan di rules database.
+export const THRESHOLD_MIN_CM = 2;
+export const THRESHOLD_MAX_CM = 400;
 
 // ===== [CONFIG] Sensor =====
 // [CHANGED] Ketiga sensor terpasang di SATU controller ESP32, jadi tidak
 // punya koordinat sendiri-sendiri (lihat DEVICE_LOCATION).
-//
-// emptyDistanceCm: jarak yang terbaca sensor saat TIDAK ada apa-apa
-// di bawahnya (muka air normal / dasar saluran). Tinggi objek = angka ini −
-// jarak terbaca. Diisi per sensor, jadi beda tinggi pemasangan ikut tertutup.
-// Nilai 60 masih CONTOH — ukur di lokasi.
 //
 // Warna sudah lolos validator palet (pemisahan buta warna, terang & gelap).
 // Urutannya tetap — jangan ditukar antar sensor. Urutan array ini juga
@@ -72,7 +84,6 @@ export const SENSORS: SensorConfig[] = [
     id: "sensor1",
     name: "Sensor 1",
     location: "Kiri",
-    emptyDistanceCm: 60,
     color: "#226597",
     colorDark: "#4a89c6",
   },
@@ -80,7 +91,6 @@ export const SENSORS: SensorConfig[] = [
     id: "sensor2",
     name: "Sensor 2",
     location: "Tengah",
-    emptyDistanceCm: 60,
     color: "#eb6834",
     colorDark: "#d95926",
   },
@@ -88,7 +98,6 @@ export const SENSORS: SensorConfig[] = [
     id: "sensor3",
     name: "Sensor 3",
     location: "Kanan",
-    emptyDistanceCm: 60,
     color: "#1baf7a",
     colorDark: "#199e70",
   },
@@ -100,9 +109,15 @@ export const SENSORS: SensorConfig[] = [
 export const DEVICE_NAME = "Stasiun ketinggian air";
 export const DEVICE_LOCATION: [number, number] = [-6.271027, 106.846205];
 
+// ===== [CONFIG] Perkiraan area terdampak =====
+// Lingkaran kecil di sekitar stasiun. Ini penanda perkiraan manual, bukan
+// hasil hitungan limpasan — ubah radiusnya sesuai kondisi lapangan.
+export const FLOOD_RADIUS_METERS = 300;
+export const FLOOD_RADIUS_COLOR = "#2563eb";
+
 // ===== [CONFIG] Peta =====
 // [CHANGED] MAP_CENTER dihapus — peta berpusat di DEVICE_LOCATION.
-export const MAP_ZOOM = 12;
+export const MAP_ZOOM = 16;
 // Esri Canvas dipilih karena tanpa API key dan punya varian gelap.
 // (CARTO sekarang wajib API key — tanpa itu tile-nya ber-watermark.)
 export const MAP_TILE_LIGHT_URL =
@@ -116,28 +131,33 @@ export const MAP_MAX_ZOOM = 19;
 export const MAP_TILE_ATTRIBUTION = "Tiles © Esri — Esri, HERE, Garmin, © OpenStreetMap contributors";
 
 // ===== [CONFIG] Prediksi objek (row 2) =====
-// [NEW] menggantikan TRASH_NOISE_CM / TRASH_FULL_SCALE_CM / TRASH_LIKELY_PERCENT.
-// peak   = tinggi objek tertinggi di antara ketiga sensor (cm)
+// peak   = bacaan tertinggi dari dasar di antara ketiga sensor (cm)
 // spread = tertinggi − terendah (cm); kecil = permukaan rata, besar = tidak rata
+//
+// [CHANGED] Sejak tinggi diukur dari DASAR (bukan dari permukaan air normal),
+// keberadaan benda tidak lagi terbaca dari peak — air dalam pun peak-nya
+// besar. Yang menandai benda adalah spread: permukaan air selalu rata, benda
+// tidak. Peak kini hanya dipakai untuk mengenali dasar yang kering.
+//
 // Dicek BERURUTAN dari atas, aturan pertama yang cocok dipakai. Aturan
 // terakhir tanpa batas = fallback, jadi selalu ada jawaban.
 export const OBJECT_PREDICTIONS: ObjectPredictionRule[] = [
   {
     label: "Tidak ada objek",
-    description: "Semua sensor membaca mendekati jarak saat kosong.",
+    description: "Ketiga sensor membaca mendekati dasar. Saluran praktis kering.",
     maxPeakCm: 3,
   },
   {
-    label: "Air naik",
+    label: "Air",
     description:
-      "Ketiga sensor melihat permukaan rata dengan tinggi yang sama. Itu air, bukan benda.",
+      "Ketiga sensor melihat permukaan rata pada tinggi yang sama. Itu air, bukan benda.",
     maxSpreadCm: 5,
   },
   {
     label: "Sampah besar",
     description:
-      "Tinggi dan tidak rata, seperti batang kayu, dahan, atau tumpukan sampah besar.",
-    minPeakCm: 30,
+      "Permukaan sangat tidak rata, seperti batang kayu, dahan, atau tumpukan sampah besar.",
+    minSpreadCm: 30,
   },
   {
     label: "Sampah",

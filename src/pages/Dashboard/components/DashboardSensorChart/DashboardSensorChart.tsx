@@ -4,12 +4,9 @@ import EChart from "../../../../components/EChart/EChart";
 import StatusChip from "../../../../components/StatusChip/StatusChip";
 import { getChartTheme } from "../../../../helpers/Chart/ChartTheme";
 import type { SensorSample } from "../../../../stores/Sensor/SensorStore";
+import { UseThresholdStore } from "../../../../stores/Settings/ThresholdStore";
 import { UseThemeStore } from "../../../../stores/Theme/ThemeStore";
-import {
-  ALERT_THRESHOLD_CM,
-  DANGER_THRESHOLD_CM,
-  type SensorConfig,
-} from "../../../../utils/constants/MonitorConstants";
+import type { SensorConfig } from "../../../../utils/constants/MonitorConstants";
 import styles from "./DashboardSensorChart.module.scss";
 
 interface DashboardSensorChartProps {
@@ -19,14 +16,29 @@ interface DashboardSensorChartProps {
 
 const DashboardSensorChart = ({ sensor, samples }: DashboardSensorChartProps) => {
   const isDarkMode = UseThemeStore((state) => state.isDarkMode);
+  // [CHANGED] Ambang & tinggi pemasangan kini dari Firebase, diatur di
+  // halaman Pengaturan Sensor
+  const alertCm = UseThresholdStore((state) => state.alertCm);
+  const dangerCm = UseThresholdStore((state) => state.dangerCm);
+  const sensorHeightCm = UseThresholdStore(
+    (state) => state.sensorHeights[sensor.id],
+  );
   const latestReading = samples.at(-1)?.readings[sensor.id];
   const seriesColor = isDarkMode ? sensor.colorDark : sensor.color;
+
+  // [CHANGED] Yang ditampilkan kini TINGGI AIR dari dasar, bukan jarak ke
+  // sensor: tinggi air = jarak sensor ke dasar − jarak terbaca.
+  const latestLevelCm = latestReading
+    ? Math.max(0, sensorHeightCm - latestReading.distanceCm)
+    : null;
 
   const { option, hasData } = useMemo(() => {
     const ct = getChartTheme(isDarkMode);
     const points = samples.flatMap((sample): [number, number][] => {
       const reading = sample.readings[sensor.id];
-      return reading ? [[sample.time, reading.distanceCm]] : [];
+      return reading
+        ? [[sample.time, Math.max(0, sensorHeightCm - reading.distanceCm)]]
+        : [];
     });
 
     const chartOption: EChartsOption = {
@@ -57,11 +69,11 @@ const DashboardSensorChart = ({ sensor, samples }: DashboardSensorChartProps) =>
       },
       yAxis: {
         type: "value",
-        // Dibalik: 0 cm (air menyentuh sensor) di atas → garis naik = air naik
-        inverse: true,
+        // [CHANGED] Tidak lagi dibalik. Sumbu = tinggi air dari dasar, jadi
+        // garis naik memang berarti air naik tanpa perlu akal-akalan.
         min: 0,
         max: (extent) =>
-          Math.ceil(Math.max(extent.max + 5, ALERT_THRESHOLD_CM + 20) / 10) * 10,
+          Math.ceil(Math.max(extent.max + 5, dangerCm + 20) / 10) * 10,
         axisLabel: { color: ct.labelMuted },
         splitLine: { lineStyle: { color: ct.splitLine } },
       },
@@ -75,18 +87,20 @@ const DashboardSensorChart = ({ sensor, samples }: DashboardSensorChartProps) =>
           symbolSize: 8,
           lineStyle: { width: 2, color: seriesColor },
           itemStyle: { color: seriesColor },
-          // Pita ambang seperti papan duga — angka dari .ino
+          // Pita ambang seperti papan duga — angka yang sama dipakai ESP32.
+          // [CHANGED] Sekarang pita ADA DI ATAS: makin tinggi air makin gawat.
           markArea: {
             silent: true,
             label: { position: "insideRight", color: ct.labelMuted, fontSize: 11 },
             data: [
               [
-                { name: "BAHAYA", yAxis: 0, itemStyle: { color: ct.dangerBand } },
-                { yAxis: DANGER_THRESHOLD_CM },
+                { name: "SIAGA", yAxis: alertCm, itemStyle: { color: ct.alertBand } },
+                { yAxis: dangerCm },
               ],
               [
-                { name: "SIAGA", yAxis: DANGER_THRESHOLD_CM, itemStyle: { color: ct.alertBand } },
-                { yAxis: ALERT_THRESHOLD_CM },
+                { name: "BAHAYA", yAxis: dangerCm, itemStyle: { color: ct.dangerBand } },
+                // "max" = sampai puncak sumbu, berapa pun tingginya nanti
+                { yAxis: "max" },
               ],
             ],
           },
@@ -95,7 +109,7 @@ const DashboardSensorChart = ({ sensor, samples }: DashboardSensorChartProps) =>
     };
 
     return { option: chartOption, hasData: points.length > 0 };
-  }, [samples, sensor, isDarkMode, seriesColor]);
+  }, [samples, sensor, isDarkMode, seriesColor, alertCm, dangerCm, sensorHeightCm]);
 
   return (
     <article className={styles.sensorCard}>
@@ -116,9 +130,9 @@ const DashboardSensorChart = ({ sensor, samples }: DashboardSensorChartProps) =>
 
       <p className={styles.reading}>
         <span className={styles.readingValue}>
-          {latestReading ? latestReading.distanceCm.toFixed(1) : "—"}
+          {latestLevelCm === null ? "—" : latestLevelCm.toFixed(1)}
         </span>
-        <span className={styles.readingUnit}>cm ke air</span>
+        <span className={styles.readingUnit}>cm tinggi air</span>
       </p>
 
       <div className={styles.chartArea}>

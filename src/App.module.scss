@@ -9,3 +9,11 @@
     overflow-y: auto;
   }
 }
+
+// [NEW] Layar tunggu saat sesi tersimpan sedang dibaca Firebase.
+.authGate {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100dvh;
+}

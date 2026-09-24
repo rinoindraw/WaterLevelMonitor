@@ -1,61 +1,33 @@
-import { FiActivity, FiLayers, FiMap } from "react-icons/fi";
-import { Link } from "react-router-dom";
-import StatusChip from "../../components/StatusChip/StatusChip";
-import {
-  ALERT_THRESHOLD_CM,
-  DANGER_THRESHOLD_CM,
-} from "../../utils/constants/MonitorConstants";
+import { Navigate, NavLink, Route, Routes } from "react-router-dom";
 import styles from "./About.module.scss";
-import { SYSTEM_FEATURES, SYSTEM_SUMMARY } from "./AboutConstants";
+import { ABOUT_TABS } from "./AboutConstants";
+import AboutProfile from "./components/AboutProfile/AboutProfile";
+import AboutSystem from "./components/AboutSystem/AboutSystem";
 
-// Ikon per fitur, urutannya sama dengan SYSTEM_FEATURES
-const FEATURE_ICONS = [FiActivity, FiLayers, FiMap];
+// [CHANGED] Halaman Tentang kini berisi dua sub-tab: sistem dan profil
+// peneliti. Sub-tab memakai rute sendiri supaya bisa ditautkan langsung dan
+// tidak hilang saat halaman dimuat ulang.
+const About = () => {
+  const tabClass = ({ isActive }: { isActive: boolean }) =>
+    isActive ? `${styles.tab} ${styles.active}` : styles.tab;
 
-const About = () => (
-  <div className={styles.about}>
-    <header className={styles.pageHeader}>
-      <h1 className={styles.pageTitle}>Tentang sistem</h1>
-      <p className={styles.pageDescription}>
-        Sistem pemantau ketinggian air dan sampah. Tiga sensor ultrasonik pada
-        satu ESP32 mengukur jarak ke permukaan, mengirimkannya ke Firebase, dan
-        web ini menampilkannya secara langsung.
-      </p>
-    </header>
-
-    <section className={styles.summaryCard}>
-      <h2 className={styles.sectionTitle}>Ringkasan</h2>
-      <dl className={styles.summaryList}>
-        {SYSTEM_SUMMARY.map((item) => (
-          <div key={item.label} className={styles.summaryRow}>
-            <dt>{item.label}</dt>
-            <dd>{item.value}</dd>
-          </div>
+  return (
+    <div className={styles.about}>
+      <nav className={styles.subTabs}>
+        {ABOUT_TABS.map((tab) => (
+          <NavLink key={tab.path} to={tab.path} end={tab.end} className={tabClass}>
+            {tab.label}
+          </NavLink>
         ))}
-        {/* Angka dari konstanta yang sama dengan pita di grafik */}
-        <div className={styles.summaryRow}>
-          <dt>Ambang status</dt>
-          <dd className={styles.thresholds}>
-            <span><StatusChip status="NORMAL" /> &gt; {ALERT_THRESHOLD_CM} cm</span>
-            <span><StatusChip status="SIAGA" /> {DANGER_THRESHOLD_CM}–{ALERT_THRESHOLD_CM} cm</span>
-            <span><StatusChip status="BAHAYA" /> ≤ {DANGER_THRESHOLD_CM} cm</span>
-          </dd>
-        </div>
-      </dl>
-    </section>
+      </nav>
 
-    <div className={styles.featureGrid}>
-      {SYSTEM_FEATURES.map((feature, index) => {
-        const Icon = FEATURE_ICONS[index];
-        return (
-          <Link key={feature.title} to={feature.path} className={styles.featureCard}>
-            <Icon className={styles.featureIcon} aria-hidden />
-            <h3 className={styles.featureTitle}>{feature.title}</h3>
-            <p className={styles.featureDescription}>{feature.description}</p>
-          </Link>
-        );
-      })}
+      <Routes>
+        <Route index element={<AboutSystem />} />
+        <Route path="profil" element={<AboutProfile />} />
+        <Route path="*" element={<Navigate to="/about" replace />} />
+      </Routes>
     </div>
-  </div>
-);
+  );
+};
 
 export default About;

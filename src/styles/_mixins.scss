@@ -1,4 +1,5 @@
 @use "variables" as *;
+@use "responsive" as *;
 
 // Kartu panel bersama: kartu sensor, kartu sampah, legenda peta.
 @mixin panel-card {
@@ -25,4 +26,368 @@
   width: 12px;
   height: 12px;
   border-radius: 3px;
+}
+
+// [NEW] Layar tamu (masuk & daftar): satu kartu di tengah layar penuh.
+// Dipakai Login.module.scss dan Register.module.scss dengan nama kelas yang
+// sama, jadi markup kedua halaman sejajar.
+@mixin auth-screen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100dvh;
+  padding: 24px;
+  background: $main-background-color;
+
+  // [NEW] Dua panel dalam satu kartu: hiasan papan duga di kiri, form di
+  // kanan. Di bawah tablet hiasannya menyembunyikan diri (lihat
+  // AuthArtwork.module.scss) dan form mengisi seluruh lebar.
+  .shell {
+    display: grid;
+    grid-template-columns: 1.05fr 1fr;
+    width: 100%;
+    max-width: 880px;
+    overflow: hidden;
+    border-radius: 14px;
+    box-shadow: 0 20px 50px rgba($black-color, 0.12);
+
+    @media (max-width: $bp-tablet) {
+      grid-template-columns: 1fr;
+      max-width: 400px;
+    }
+  }
+
+  .card {
+    @include panel-card;
+
+    gap: 18px;
+    width: 100%;
+    padding: 28px;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+
+      .brandIcon {
+        font-size: 22px;
+        color: $primary-color-alt-two;
+      }
+
+      .brandName {
+        font-size: 15px;
+        font-weight: 500;
+        color: $gray-label-color;
+        text-transform: capitalize;
+      }
+    }
+
+    .heading {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+
+      .title {
+        margin: 0;
+        font-size: 22px;
+        font-weight: 600;
+        color: $gray-label-color;
+        text-transform: capitalize;
+      }
+
+      .description {
+        margin: 0;
+        font-size: 13px;
+        line-height: 1.5;
+        color: $soft-gray-darker;
+      }
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+
+      .fieldLabel {
+        font-size: 13px;
+        font-weight: 500;
+        color: $gray-label-color;
+        text-transform: capitalize;
+      }
+
+      .input {
+        // Lebar penuh; padding kanan disediakan untuk tombol mata
+        width: 100%;
+        padding: 10px 12px;
+        font-size: 14px;
+        color: $gray-label-color;
+        background: $surface-color;
+        border: 1px solid $soft-gray-darker-alt;
+        border-radius: 8px;
+
+        &::placeholder {
+          color: $gray-color-lighter;
+        }
+
+        &:focus-visible {
+          outline: 2px solid $primary-color-alt-three;
+          outline-offset: -1px;
+        }
+      }
+
+      // [NEW] Kata sandi bisa dilihat. Tombolnya ditumpuk di dalam kotak isian.
+      .passwordWrapper {
+        position: relative;
+        display: flex;
+
+        .input {
+          padding-right: 42px;
+        }
+
+        .reveal {
+          position: absolute;
+          top: 0;
+          right: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 40px;
+          height: 100%;
+          padding: 0;
+          font-size: 16px;
+          color: $soft-gray-darker;
+          background: none;
+          border: none;
+          border-radius: 0 8px 8px 0;
+          cursor: pointer;
+
+          &:hover {
+            color: $primary-color-alt-two;
+          }
+
+          &:focus-visible {
+            outline: 2px solid $primary-color-alt-three;
+            outline-offset: -2px;
+          }
+        }
+      }
+
+      .fieldHint {
+        font-size: 12px;
+        color: $soft-gray-darker;
+      }
+    }
+
+    .error {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0;
+      padding: 10px 12px;
+      font-size: 13px;
+      color: $red-color-darker;
+      background: $soft-red-color-lighter;
+      border: 1px solid $soft-red-color-alt-two;
+      border-radius: 8px;
+    }
+
+    .submit {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 42px;
+      font-size: 14px;
+      font-weight: 500;
+      color: $surface-color;
+      background: $primary-color-alt-two;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      text-transform: capitalize;
+
+      &:hover:not(:disabled) {
+        background: $primary-color-alt-three;
+      }
+
+      &:disabled {
+        cursor: default;
+        opacity: 0.7;
+      }
+
+      &:focus-visible {
+        outline: 2px solid $primary-color-alt-three;
+        outline-offset: 2px;
+      }
+    }
+
+    // Tautan pindah antara halaman masuk dan daftar.
+    .switch {
+      margin: 0;
+      font-size: 13px;
+      text-align: center;
+      color: $soft-gray-darker;
+
+      .switchLink {
+        color: $primary-color-alt-two;
+        font-weight: 500;
+        text-decoration: none;
+
+        &:hover {
+          text-decoration: underline;
+        }
+      }
+    }
+  }
+
+  @media (max-width: $bp-mobile) {
+    padding: 16px;
+
+    .card {
+      padding: 22px;
+    }
+  }
+
+  :global(body.darkTheme) & {
+    background: $dark-color-one;
+
+    .shell {
+      box-shadow: 0 20px 50px rgba($black-color, 0.5);
+    }
+
+    .card {
+      .brand {
+        .brandIcon {
+          color: $primary-color-alt-four;
+        }
+
+        .brandName {
+          color: $dark-text;
+        }
+      }
+
+      .heading {
+        .title {
+          color: $dark-text;
+        }
+
+        .description {
+          color: $dark-text-muted;
+        }
+      }
+
+      .field {
+        .fieldLabel {
+          color: $dark-text;
+        }
+
+        .input {
+          color: $dark-text;
+          background: $dark-color-one;
+          border-color: $dark-border;
+        }
+
+        .passwordWrapper .reveal {
+          color: $dark-text-muted;
+
+          &:hover {
+            color: $primary-color-alt-four;
+          }
+        }
+
+        .fieldHint {
+          color: $dark-text-muted;
+        }
+      }
+
+      .error {
+        color: $soft-red-color-alt-three;
+        background: rgba($status-critical, 0.12);
+        border-color: rgba($status-critical, 0.35);
+      }
+
+      .submit {
+        color: $dark-color-one;
+        background: $primary-color-alt-four;
+
+        &:hover:not(:disabled) {
+          background: $primary-color-alt-three;
+        }
+      }
+
+      .switch {
+        color: $dark-text-muted;
+
+        .switchLink {
+          color: $primary-color-alt-four;
+        }
+      }
+    }
+  }
+}
+
+// [NEW] Deret sub-tab di atas isi halaman (Tentang & Admin). Kelas anaknya
+// sama di kedua halaman: .tab dan .tab.active.
+@mixin sub-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 3px;
+  align-self: flex-start;
+  background: $surface-color;
+  border: 1px solid $soft-gray-darker-alt;
+  border-radius: 9px;
+
+  .tab {
+    padding: 6px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    color: $soft-gray-darker;
+    text-decoration: none;
+    text-transform: capitalize;
+    border-radius: 6px;
+    transition: color 0.2s ease, background 0.2s ease;
+
+    &:hover {
+      color: $primary-color-alt-two;
+    }
+
+    &:focus-visible {
+      outline: 2px solid $primary-color-alt-three;
+      outline-offset: -2px;
+    }
+
+    &.active {
+      color: $white-color;
+      background: $primary-color-alt-two;
+    }
+  }
+
+  @media (max-width: $bp-mobile) {
+    align-self: stretch;
+
+    .tab {
+      flex: 1;
+      text-align: center;
+    }
+  }
+
+  :global(body.darkTheme) & {
+    background: $dark-color-two;
+    border-color: $dark-border;
+
+    .tab {
+      color: $dark-text-muted;
+
+      &:hover {
+        color: $primary-color-alt-four;
+      }
+
+      &.active {
+        color: $dark-color-one;
+        background: $primary-color-alt-four;
+      }
+    }
+  }
 }
