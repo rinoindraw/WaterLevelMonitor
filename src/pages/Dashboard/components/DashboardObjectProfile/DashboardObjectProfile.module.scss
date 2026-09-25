@@ -58,6 +58,7 @@
       .predictionCaption {
         font-size: 13px;
         color: $soft-gray-darker;
+        text-transform: capitalize;
       }
 
       .predictionLabel {
@@ -82,6 +83,7 @@
 
         dt {
           color: $soft-gray-darker;
+          text-transform: capitalize;
         }
 
         dd {

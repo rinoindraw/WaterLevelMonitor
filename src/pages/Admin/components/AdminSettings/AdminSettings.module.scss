@@ -60,6 +60,7 @@
           font-size: 14px;
           font-weight: 500;
           color: $gray-label-color;
+          text-transform: capitalize;
         }
 
         .inputWrapper {
@@ -132,6 +133,13 @@
 
       .fieldRow {
         grid-template-columns: repeat(3, minmax(0, 1fr));
+
+        // [NEW] Selektor ini lebih spesifik daripada aturan tablet .fieldRow di
+        // atas, jadi harus diulang di sini — kalau tidak, tiga kolom bertahan
+        // sampai ponsel dan kotak isian 110px meluap.
+        @media (max-width: $bp-tablet) {
+          grid-template-columns: 1fr;
+        }
       }
 
       .swatch {

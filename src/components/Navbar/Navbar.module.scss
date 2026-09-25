@@ -85,6 +85,9 @@
     display: flex;
     align-items: center;
     gap: 16px;
+    // [NEW] Supaya email bisa menyusut (elipsis) saat ruang kurang, bukan
+    // mendorong navbar melebar
+    min-width: 0;
     margin-left: auto;
 
     .connection {
@@ -94,6 +97,7 @@
       font-size: 13px;
       color: $soft-gray-darker;
       white-space: nowrap;
+      text-transform: capitalize;
 
       .connectionDot {
         width: 8px;
@@ -175,11 +179,12 @@
     }
   }
 
-  @media (max-width: $bp-tablet) {
-    gap: 12px;
-    padding: 0 16px;
-
-    .brand .title {
+  // [CHANGED] Dulu judul & email baru hilang di <= tablet, sehingga navbar
+  // admin melebar sampai ~1110px dan meluap di iPad (810–1024). Sekarang
+  // ketiganya hilang di <= laptop; titik status tetap tampil sebagai warna.
+  @media (max-width: $bp-laptop) {
+    .brand .title,
+    .actions .connection .connectionLabel {
       display: none;
     }
 
@@ -189,14 +194,20 @@
     }
   }
 
+  @media (max-width: $bp-tablet) {
+    gap: 12px;
+    padding: 0 16px;
+
+    // [CHANGED] Dipindah dari <= mobile: dengan label, empat tautan admin
+    // masih meluap sampai ~700px.
+    .navLinks .navLink span {
+      display: none;
+    }
+  }
+
   @media (max-width: $bp-mobile) {
     gap: 8px;
     padding: 0 12px;
-
-    .navLinks .navLink span,
-    .actions .connection .connectionLabel {
-      display: none;
-    }
 
     // Tanpa label, tautan tinggal ikon — paddingnya ikut dikecilkan supaya
     // empat tautan + tombol masih muat di layar 360px tanpa menggeser navbar.

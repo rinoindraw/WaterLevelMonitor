@@ -85,7 +85,7 @@ const DashboardObjectProfile = ({ samples }: DashboardObjectProfileProps) => {
       },
       yAxis: {
         type: "value",
-        name: "Tinggi dari dasar (cm)",
+        name: "Tinggi Dari Dasar (cm)",
         nameTextStyle: { color: ct.labelMuted, align: "left" },
         min: 0,
         // Ruang ~15% di atas tinggi maksimum supaya label nilai di puncak
@@ -101,7 +101,7 @@ const DashboardObjectProfile = ({ samples }: DashboardObjectProfileProps) => {
       series: [
         {
           type: "line",
-          name: "Tinggi dari dasar",
+          name: "Tinggi Dari Dasar",
           smooth: 0.4,
           symbol: "circle",
           symbolSize: 10,

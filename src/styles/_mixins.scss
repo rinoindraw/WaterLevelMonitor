@@ -234,6 +234,7 @@
         color: $primary-color-alt-two;
         font-weight: 500;
         text-decoration: none;
+        text-transform: capitalize;
 
         &:hover {
           text-decoration: underline;
