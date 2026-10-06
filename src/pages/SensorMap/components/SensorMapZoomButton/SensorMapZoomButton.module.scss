@@ -1,0 +1,49 @@
+@use "variables" as *;
+@use "mixins" as *;
+@use "responsive" as *;
+
+// Meniru tombol zoom bawaan Leaflet (kotak putih, tepi abu, sudut membulat)
+// supaya terbaca satu kelompok dengannya. Posisi: di bawah tombol + / −, yang
+// berakhir sekitar 10 + 60 px dari atas.
+.zoomButtonWrapper {
+  position: absolute;
+  top: 82px;
+  left: 10px;
+  z-index: 1000;
+
+  .zoomButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    font-size: 18px;
+    color: #333333;
+    background: #ffffff;
+    border: 2px solid rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+    background-clip: padding-box;
+    cursor: pointer;
+
+    &:hover {
+      background: #f4f4f4;
+    }
+
+    &:focus-visible {
+      outline: 2px solid $primary-color-alt-three;
+      outline-offset: 2px;
+    }
+  }
+
+  :global(body.darkTheme) & {
+    .zoomButton {
+      color: $dark-text;
+      background: $dark-color-one;
+      border-color: $dark-border;
+
+      &:hover {
+        background: $dark-color-two;
+      }
+    }
+  }
+}

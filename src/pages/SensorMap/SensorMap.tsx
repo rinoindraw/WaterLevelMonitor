@@ -9,6 +9,8 @@ import {
 import { FiWifiOff } from "react-icons/fi"; // [NEW]
 import { LoadingSpinner } from "../../components/LoadingState/LoadingState"; // [NEW]
 import StatusChip from "../../components/StatusChip/StatusChip";
+import SensorMapWeather from "./components/SensorMapWeather/SensorMapWeather"; // [NEW]
+import SensorMapZoomButton from "./components/SensorMapZoomButton/SensorMapZoomButton"; // [NEW]
 import type { ConnectionState } from "../../hooks/Sensor/UseSensorRealtime"; // [NEW]
 import { UseSensorStore } from "../../stores/Sensor/SensorStore";
 import { UseThresholdStore } from "../../stores/Settings/ThresholdStore";
@@ -18,6 +20,8 @@ import {
   DEVICE_NAME,
   FLOOD_RADIUS_COLOR,
   FLOOD_RADIUS_METERS,
+  MAP_BACKGROUND_DARK,
+  MAP_BACKGROUND_LIGHT,
   MAP_MAX_ZOOM,
   MAP_TILE_ATTRIBUTION,
   MAP_TILE_DARK_URL,
@@ -62,15 +66,22 @@ const SensorMap = ({ connection }: SensorMapProps) => {
         zoom={MAP_ZOOM}
         maxZoom={MAP_MAX_ZOOM}
         className={styles.map}
+        style={{
+          background: isDarkMode ? MAP_BACKGROUND_DARK : MAP_BACKGROUND_LIGHT,
+        }}
       >
-        {/* key memaksa TileLayer dipasang ulang saat tema berganti */}
+        {/* Tanpa `key`: dengan key, ganti tema = remount, layer lama dicabut
+            dulu sehingga ada jeda peta kosong. Tanpa key, react-leaflet
+            mengganti url di tempat (setUrl), ubin lama tetap tampil sampai
+            yang baru siap. */}
         <TileLayer
-          key={isDarkMode ? "dark" : "light"}
           url={isDarkMode ? MAP_TILE_DARK_URL : MAP_TILE_LIGHT_URL}
           attribution={MAP_TILE_ATTRIBUTION}
           maxNativeZoom={MAP_TILE_MAX_NATIVE_ZOOM}
           maxZoom={MAP_MAX_ZOOM}
         />
+
+        <SensorMapZoomButton />
 
         {/* [NEW] Perkiraan area terdampak di sekitar stasiun. Digambar
             SEBELUM marker agar marker tetap berada di atasnya. */}
@@ -150,6 +161,9 @@ const SensorMap = ({ connection }: SensorMapProps) => {
           )}
         </div>
       )}
+
+      {/* [NEW] Cuaca saat ini di pojok kanan atas */}
+      <SensorMapWeather />
 
       <div className={styles.mapLegend}>
         <p className={styles.legendTitle}>Status stasiun</p>

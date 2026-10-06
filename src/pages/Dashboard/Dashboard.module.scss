@@ -13,8 +13,18 @@
 
   .pageHeader {
     display: flex;
-    flex-direction: column;
-    gap: 4px;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px 24px;
+
+    .headerText {
+      display: flex;
+      flex: 1 1 320px;
+      flex-direction: column;
+      gap: 4px;
+      min-width: 0;
+    }
 
     .pageTitle {
       font-size: 22px;

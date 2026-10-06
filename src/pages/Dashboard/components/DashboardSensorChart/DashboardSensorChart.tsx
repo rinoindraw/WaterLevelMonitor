@@ -6,18 +6,26 @@ import { getChartTheme } from "../../../../helpers/Chart/ChartTheme";
 import type { SensorSample } from "../../../../stores/Sensor/SensorStore";
 import { UseThresholdStore } from "../../../../stores/Settings/ThresholdStore";
 import { UseThemeStore } from "../../../../stores/Theme/ThemeStore";
-import type { SensorConfig } from "../../../../utils/constants/MonitorConstants";
+import {
+  STATUS_COLORS,
+  type SensorConfig,
+} from "../../../../utils/constants/MonitorConstants";
 import styles from "./DashboardSensorChart.module.scss";
 
+// Grafik realtime: titiknya dari buffer pembacaan /sensorN (±3 detik sekali) di
+// store, jadi bergerak begitu ada data baru. Riwayat panjang ada di section
+// grafik di bawah.
 interface DashboardSensorChartProps {
   sensor: SensorConfig;
   samples: SensorSample[];
 }
 
-const DashboardSensorChart = ({ sensor, samples }: DashboardSensorChartProps) => {
+const DashboardSensorChart = ({
+  sensor,
+  samples,
+}: DashboardSensorChartProps) => {
   const isDarkMode = UseThemeStore((state) => state.isDarkMode);
-  // [CHANGED] Ambang & tinggi pemasangan kini dari Firebase, diatur di
-  // halaman Pengaturan Sensor
+  // Ambang & tinggi pemasangan dari Firebase, diatur di halaman Pengaturan Sensor
   const alertCm = UseThresholdStore((state) => state.alertCm);
   const dangerCm = UseThresholdStore((state) => state.dangerCm);
   const sensorHeightCm = UseThresholdStore(
@@ -26,20 +34,25 @@ const DashboardSensorChart = ({ sensor, samples }: DashboardSensorChartProps) =>
   const latestReading = samples.at(-1)?.readings[sensor.id];
   const seriesColor = isDarkMode ? sensor.colorDark : sensor.color;
 
-  // [CHANGED] Yang ditampilkan kini TINGGI AIR dari dasar, bukan jarak ke
-  // sensor: tinggi air = jarak sensor ke dasar − jarak terbaca.
+  // Tinggi air dari dasar = jarak sensor ke dasar − jarak terbaca
   const latestLevelCm = latestReading
     ? Math.max(0, sensorHeightCm - latestReading.distanceCm)
     : null;
 
-  const { option, hasData } = useMemo(() => {
+  // Tinggi air dari dasar tiap sampel, urut lama → baru
+  const points = useMemo(
+    () =>
+      samples.flatMap((sample): [number, number][] => {
+        const reading = sample.readings[sensor.id];
+        return reading
+          ? [[sample.time, Math.max(0, sensorHeightCm - reading.distanceCm)]]
+          : [];
+      }),
+    [samples, sensor.id, sensorHeightCm],
+  );
+
+  const option = useMemo(() => {
     const ct = getChartTheme(isDarkMode);
-    const points = samples.flatMap((sample): [number, number][] => {
-      const reading = sample.readings[sensor.id];
-      return reading
-        ? [[sample.time, Math.max(0, sensorHeightCm - reading.distanceCm)]]
-        : [];
-    });
 
     const chartOption: EChartsOption = {
       animation: false,
@@ -50,13 +63,20 @@ const DashboardSensorChart = ({ sensor, samples }: DashboardSensorChartProps) =>
         backgroundColor: ct.tooltipBackground,
         borderColor: ct.axisLine,
         textStyle: { color: ct.labelStrong },
-        valueFormatter: (value) => `${Number(value).toFixed(1)} cm`,
+        formatter: (raw: unknown) => {
+          const item = (Array.isArray(raw) ? raw : [raw])[0] as {
+            axisValue: number;
+            marker: string;
+            value: number[];
+          };
+          const time = new Date(item.axisValue).toLocaleTimeString("id-ID");
+          return `${time}<br/>${item.marker} ${sensor.name}: ${item.value[1].toFixed(1)} cm`;
+        },
       },
       xAxis: {
         type: "time",
-        // Titik hanya masuk saat Firebase berubah, jadi bisa cuma 1 titik.
-        // Tanpa ini ECharts melebarkan sumbu jadi berhari-hari; di sini
-        // minimal 1 menit ke belakang dari titik terakhir.
+        // Bisa cuma 1 titik; tanpa ini ECharts melebarkan sumbu jadi
+        // berhari-hari; di sini minimal 1 menit ke belakang dari titik terakhir.
         min: (extent) => Math.min(extent.min, extent.max - 60_000),
         max: "dataMax",
         axisLine: { lineStyle: { color: ct.axisLine } },
@@ -69,8 +89,7 @@ const DashboardSensorChart = ({ sensor, samples }: DashboardSensorChartProps) =>
       },
       yAxis: {
         type: "value",
-        // [CHANGED] Tidak lagi dibalik. Sumbu = tinggi air dari dasar, jadi
-        // garis naik memang berarti air naik tanpa perlu akal-akalan.
+        // Sumbu = tinggi air dari dasar, jadi garis naik memang berarti air naik
         min: 0,
         max: (extent) =>
           Math.ceil(Math.max(extent.max + 5, dangerCm + 20) / 10) * 10,
@@ -82,34 +101,40 @@ const DashboardSensorChart = ({ sensor, samples }: DashboardSensorChartProps) =>
           type: "line",
           name: sensor.name,
           data: points,
-          // Satu titik tanpa simbol = tidak terlihat sama sekali
-          showSymbol: points.length === 1,
-          symbolSize: 8,
+          showSymbol: true,
+          symbolSize: 4,
           lineStyle: { width: 2, color: seriesColor },
           itemStyle: { color: seriesColor },
-          // Pita ambang seperti papan duga — angka yang sama dipakai ESP32.
-          // [CHANGED] Sekarang pita ADA DI ATAS: makin tinggi air makin gawat.
-          markArea: {
+          // Garis ambang putus-putus, sama seperti grafik riwayat — angka yang
+          // sama dipakai ESP32.
+          markLine: {
             silent: true,
-            label: { position: "insideRight", color: ct.labelMuted, fontSize: 11 },
+            symbol: "none",
+            label: {
+              formatter: "{b}",
+              position: "insideEndTop",
+              color: ct.labelMuted,
+              fontSize: 11,
+            },
             data: [
-              [
-                { name: "SIAGA", yAxis: alertCm, itemStyle: { color: ct.alertBand } },
-                { yAxis: dangerCm },
-              ],
-              [
-                { name: "BAHAYA", yAxis: dangerCm, itemStyle: { color: ct.dangerBand } },
-                // "max" = sampai puncak sumbu, berapa pun tingginya nanti
-                { yAxis: "max" },
-              ],
+              {
+                name: "SIAGA",
+                yAxis: alertCm,
+                lineStyle: { color: STATUS_COLORS.SIAGA, type: "dashed" },
+              },
+              {
+                name: "BAHAYA",
+                yAxis: dangerCm,
+                lineStyle: { color: STATUS_COLORS.BAHAYA, type: "dashed" },
+              },
             ],
           },
         },
       ],
     };
 
-    return { option: chartOption, hasData: points.length > 0 };
-  }, [samples, sensor, isDarkMode, seriesColor, alertCm, dangerCm, sensorHeightCm]);
+    return chartOption;
+  }, [points, sensor, isDarkMode, seriesColor, alertCm, dangerCm]);
 
   return (
     <article className={styles.sensorCard}>
@@ -121,7 +146,7 @@ const DashboardSensorChart = ({ sensor, samples }: DashboardSensorChartProps) =>
             aria-hidden
           />
           <div>
-            <h2 className={styles.sensorName}>{sensor.name}</h2>
+            <h2 className={styles.sensorName}>Realtime {sensor.name}</h2>
             <p className={styles.sensorLocation}>{sensor.location}</p>
           </div>
         </div>
@@ -132,16 +157,11 @@ const DashboardSensorChart = ({ sensor, samples }: DashboardSensorChartProps) =>
         <span className={styles.readingValue}>
           {latestLevelCm === null ? "—" : latestLevelCm.toFixed(1)}
         </span>
-        <span className={styles.readingUnit}>cm tinggi air</span>
+        <span className={styles.readingUnit}>cm Tinggi Muka Air</span>
       </p>
 
       <div className={styles.chartArea}>
         <EChart option={option} />
-        {!hasData && (
-          <p className={styles.emptyState}>
-            Belum ada data dari {sensor.name}.
-          </p>
-        )}
       </div>
     </article>
   );

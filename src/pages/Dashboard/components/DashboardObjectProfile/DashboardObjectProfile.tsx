@@ -2,13 +2,11 @@ import type { EChartsOption, MarkLineComponentOption } from "echarts";
 import { useMemo } from "react";
 import EChart from "../../../../components/EChart/EChart";
 import { getChartTheme } from "../../../../helpers/Chart/ChartTheme";
+import { predictObject } from "../../../../helpers/ObjectPrediction/ObjectPredictionHelpers";
 import type { SensorSample } from "../../../../stores/Sensor/SensorStore";
 import { UseThresholdStore } from "../../../../stores/Settings/ThresholdStore";
 import { UseThemeStore } from "../../../../stores/Theme/ThemeStore";
-import {
-  OBJECT_PREDICTIONS,
-  SENSORS,
-} from "../../../../utils/constants/MonitorConstants";
+import { SENSORS } from "../../../../utils/constants/MonitorConstants";
 import styles from "./DashboardObjectProfile.module.scss";
 
 interface DashboardObjectProfileProps {
@@ -146,16 +144,7 @@ const DashboardObjectProfile = ({ samples }: DashboardObjectProfileProps) => {
   const values = heights.filter((height): height is number => height !== null);
   const peakCm = hasAllReadings ? Math.max(...values) : null;
   const spreadCm = hasAllReadings ? Math.max(...values) - Math.min(...values) : null;
-  const prediction =
-    peakCm !== null && spreadCm !== null
-      ? OBJECT_PREDICTIONS.find(
-          (rule) =>
-            (rule.minPeakCm === undefined || peakCm >= rule.minPeakCm) &&
-            (rule.maxPeakCm === undefined || peakCm < rule.maxPeakCm) &&
-            (rule.minSpreadCm === undefined || spreadCm >= rule.minSpreadCm) &&
-            (rule.maxSpreadCm === undefined || spreadCm < rule.maxSpreadCm),
-        )
-      : undefined;
+  const prediction = predictObject(heights);
 
   return (
     <article className={styles.profileCard}>

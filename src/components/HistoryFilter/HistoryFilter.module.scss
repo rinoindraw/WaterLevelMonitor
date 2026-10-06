@@ -1,0 +1,21 @@
+@use "variables" as *;
+@use "mixins" as *;
+@use "responsive" as *;
+
+.historyFilter {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+
+  .periodTabs {
+    @include sub-tabs;
+
+    .tab {
+      font-family: inherit;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+  }
+}

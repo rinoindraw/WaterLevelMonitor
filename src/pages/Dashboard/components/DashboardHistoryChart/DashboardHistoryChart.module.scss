@@ -2,69 +2,47 @@
 @use "mixins" as *;
 @use "responsive" as *;
 
-.sensorCard {
+.historyCard {
   @include panel-card;
 
   .cardHeader {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
+    flex-wrap: wrap;
     gap: 12px;
 
-    .identity {
+    .heading {
       display: flex;
-      align-items: center;
-      gap: 10px;
+      flex-direction: column;
+      gap: 2px;
       min-width: 0;
 
-      .swatch {
-        @include swatch;
-      }
-
-      .sensorName {
+      .title {
         font-size: 16px;
         font-weight: 500;
         color: $gray-label-color;
         text-transform: capitalize;
       }
 
-      .sensorLocation {
+      .subtitle {
+        max-width: 56ch;
         font-size: 13px;
         color: $soft-gray-darker;
       }
     }
-  }
 
-  .reading {
-    display: flex;
-    align-items: baseline;
-    gap: 6px;
-
-    .readingValue {
-      font-size: 32px;
-      font-weight: 500;
-      line-height: 1;
-      color: $gray-label-color;
-      font-variant-numeric: tabular-nums;
-    }
-
-    .readingUnit {
-      font-size: 13px;
-      color: $soft-gray-darker;
-    }
   }
 
   .chartArea {
     position: relative;
-    height: 220px;
+    height: 320px;
 
-    // Tiga kartu bertumpuk di ponsel — tiap kartu dipendekkan supaya
-    // ketiganya tidak menuntut gulir sepanjang tiga layar penuh.
     @media (max-width: $bp-mobile) {
-      height: 180px;
+      height: 260px;
     }
 
-    .emptyState {
+    .overlay {
       position: absolute;
       inset: 0;
       display: flex;
@@ -78,10 +56,18 @@
     }
   }
 
-  // [NEW] Tombol pagination di dasar kartu
   .cardFooter {
     display: flex;
-    justify-content: flex-end;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+
+    .note {
+      font-size: 12px;
+      font-style: italic;
+      color: $soft-gray-darker;
+    }
 
     .pager {
       display: flex;
@@ -89,8 +75,8 @@
     }
 
     .pagerButton {
-      padding: 5px 12px;
-      font-size: 12px;
+      padding: 7px 14px;
+      font-size: 13px;
       font-weight: 500;
       font-family: inherit;
       color: $primary-color-alt-two;
@@ -103,6 +89,15 @@
       &:hover:not(:disabled) {
         color: $white-color;
         background: $primary-color-alt-two;
+      }
+
+      &.iconButton {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 38px;
+        padding: 7px 9px;
+        font-size: 18px;
       }
 
       &:disabled {
@@ -118,37 +113,35 @@
   }
 
   :global(body.darkTheme) & {
-    .cardHeader .identity {
-      .sensorName {
-        color: $dark-text;
-      }
+    .cardHeader {
+      .heading {
+        .title {
+          color: $dark-text;
+        }
 
-      .sensorLocation {
-        color: $dark-text-muted;
-      }
-    }
-
-    .reading {
-      .readingValue {
-        color: $dark-text;
-      }
-
-      .readingUnit {
-        color: $dark-text-muted;
+        .subtitle {
+          color: $dark-text-muted;
+        }
       }
     }
 
-    .chartArea .emptyState {
+    .chartArea .overlay {
       color: $dark-text-muted;
     }
 
-    .cardFooter .pagerButton {
-      color: $primary-color-alt-four;
-      border-color: $primary-color-alt-four;
+    .cardFooter {
+      .note {
+        color: $dark-text-muted;
+      }
 
-      &:hover:not(:disabled) {
-        color: $dark-color-one;
-        background: $primary-color-alt-four;
+      .pagerButton {
+        color: $primary-color-alt-four;
+        border-color: $primary-color-alt-four;
+
+        &:hover:not(:disabled) {
+          color: $dark-color-one;
+          background: $primary-color-alt-four;
+        }
       }
     }
   }

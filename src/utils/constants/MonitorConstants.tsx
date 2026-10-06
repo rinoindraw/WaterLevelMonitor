@@ -28,6 +28,11 @@ export interface ObjectPredictionRule {
   maxPeakCm?: number;
   minSpreadCm?: number;
   maxSpreadCm?: number;
+  // [NEW] Kemiringan = |kiri − kanan|; penyimpangan tengah = seberapa jauh
+  // sensor tengah dari garis lurus kiri–kanan. Keduanya mengenali permukaan
+  // miring (garis lurus), yang beda dari benda (ada yang menonjol).
+  minTiltCm?: number;
+  maxMidDeviationCm?: number;
 }
 
 // ===== [CONFIG] Firebase =====
@@ -49,6 +54,39 @@ export const SNAPSHOT_SETTLE_MS = 1000;
 // awal — ia diam sambil terus mencoba. Lewat batas ini tanpa tersambung,
 // status dianggap offline (SDK tetap mencoba; begitu tersambung → live).
 export const CONNECTION_TIMEOUT_MS = 10000;
+
+// ===== [CONFIG] Riwayat (grafik historis) =====
+// [NEW] Jumlah titik per sensor yang ditarik dari /history dalam satu halaman.
+// Pada interval 30 detik, 1000 titik ≈ 8,3 jam. Makin besar makin sedikit
+// klik "Muat data lebih lama", tapi makin berat tiap unduhan.
+export const HISTORY_PAGE_SIZE = 250;
+// Jumlah titik MENTAH per sensor yang ditarik tiap kali, untuk tab rata-rata.
+// Satu bucket butuh banyak titik (jam ≈ 120, hari ≈ 2.880, bulan ≈ 86.000 pada
+// interval 30 detik); bucket di tepi data yang belum lengkap disembunyikan,
+// jadi tarikan harus cukup besar supaya ada bucket penuh yang tampil.
+export const AGGREGATE_FETCH_SIZE: Record<"day" | "month" | "year", number> = {
+  day: 1000,
+  month: 5000,
+  year: 20000,
+};
+// [NEW] Jumlah baris (satu baris = satu waktu pembacaan, memuat ketiga sensor)
+// per halaman di tabel riwayat.
+export const HISTORY_TABLE_PAGE_SIZE = 20;
+// Batas titik per sensor di PDF tabel Data (yang terbaru dalam rentang filter).
+// PDF dengan puluhan ribu baris berat dan lambat; data lengkap lewat CSV. Tabel
+// rata-rata tidak dibatasi (jumlah barisnya kecil).
+export const HISTORY_PDF_MAX_POINTS = 1500;
+// [NEW] Jumlah titik per sensor yang ditarik dari /history tiap kali tabel
+// kehabisan baris. Ditampilkan tetap HISTORY_TABLE_PAGE_SIZE baris per halaman;
+// angka ini hanya menentukan seberapa sering tabel harus mengunduh lagi.
+export const HISTORY_TABLE_FETCH_SIZE = 250;
+
+// ===== [CONFIG] Cuaca saat ini =====
+// [NEW] Open-Meteo: gratis untuk non-komersial, tanpa API key, data CC BY 4.0
+// (atribusi wajib — sudah ada di kartu cuaca).
+export const WEATHER_API_URL = "https://api.open-meteo.com/v1/forecast";
+// Cuaca berubah pelan; 10 menit cukup dan jauh di bawah batas kuota gratis.
+export const WEATHER_REFRESH_MS = 10 * 60 * 1000;
 
 // ===== [CONFIG] Ambang status =====
 // [CHANGED] Ambang kini dinyatakan sebagai TINGGI AIR dari dasar, bukan jarak
@@ -128,6 +166,14 @@ export const MAP_TILE_DARK_URL =
 // tile zoom 16 alih-alih meminta tile "Map data not yet available".
 export const MAP_TILE_MAX_NATIVE_ZOOM = 16;
 export const MAP_MAX_ZOOM = 19;
+// Latar di belakang ubin, disamakan dengan warna dominan basemap supaya celah
+// subpiksel antar-ubin dan ubin yang belum termuat saat zoom tidak berkedip
+// abu-abu terang Leaflet. DIUKUR dari ubin Esri Canvas sungguhan (piksel
+// terbanyak pada ubin daratan di sekitar stasiun), bukan ditebak. Warna
+// DARATAN yang dipilih, bukan laut (#d0cfd4 / #232227): stasiun ada di darat
+// dan tampilan bawaan zoom 16 didominasi daratan.
+export const MAP_BACKGROUND_LIGHT = "#efefef";
+export const MAP_BACKGROUND_DARK = "#474749";
 export const MAP_TILE_ATTRIBUTION = "Tiles © Esri — Esri, HERE, Garmin, © OpenStreetMap contributors";
 
 // ===== [CONFIG] Prediksi objek (row 2) =====
@@ -138,6 +184,16 @@ export const MAP_TILE_ATTRIBUTION = "Tiles © Esri — Esri, HERE, Garmin, © Op
 // keberadaan benda tidak lagi terbaca dari peak — air dalam pun peak-nya
 // besar. Yang menandai benda adalah spread: permukaan air selalu rata, benda
 // tidak. Peak kini hanya dipakai untuk mengenali dasar yang kering.
+//
+// [NEW] Sensor dianggap "terangkat" (ada sesuatu di bawahnya) kalau bacaannya
+// setinggi ini di atas sensor terendah. Sensor terendah dianggap permukaan air
+// yang tidak terhalang. Sama dengan batas "Air" (spread < 5 cm) di bawah, jadi
+// begitu air dianggap tidak rata, minimal satu sensor pasti terangkat.
+export const OBJECT_ELEVATED_CM = 5;
+
+// Label & deskripsi boleh memuat token yang diisi saat prediksi dibuat:
+//   {posisi}     sensor yang terangkat, mis. "kiri", "tengah dan kanan"
+//   {sisiTinggi} sisi yang lebih tinggi pada permukaan miring: "kiri"/"kanan"
 //
 // Dicek BERURUTAN dari atas, aturan pertama yang cocok dipakai. Aturan
 // terakhir tanpa batas = fallback, jadi selalu ada jawaban.
@@ -154,14 +210,29 @@ export const OBJECT_PREDICTIONS: ObjectPredictionRule[] = [
     maxSpreadCm: 5,
   },
   {
-    label: "Sampah besar",
+    label: "Permukaan miring ({sisiTinggi} lebih tinggi)",
     description:
-      "Permukaan sangat tidak rata, seperti batang kayu, dahan, atau tumpukan sampah besar.",
+      "Tinggi ketiga sensor berubah lurus dari kiri ke kanan, tanpa bagian yang menonjol. Kemungkinan arus deras atau air yang membelok, bukan benda.",
+    minTiltCm: 8,
+    maxMidDeviationCm: 3,
+    maxSpreadCm: 30,
+  },
+  {
+    label: "Sampah besar di {posisi}",
+    description:
+      "Permukaan di bagian {posisi} jauh lebih tinggi dari yang lain, seperti batang kayu, dahan, atau tumpukan sampah besar.",
     minSpreadCm: 30,
   },
   {
-    label: "Sampah",
-    description: "Permukaan tidak rata di bawah sensor, khas sampah yang mengapung.",
+    label: "Sampah di {posisi}",
+    description:
+      "Permukaan di bagian {posisi} lebih tinggi dari yang lain, khas sampah yang mengapung.",
+    minSpreadCm: 15,
+  },
+  {
+    label: "Objek kecil di {posisi}",
+    description:
+      "Ada tonjolan kecil di bagian {posisi}: bisa daun, plastik kecil, atau gelombang. Pantau apakah bertambah.",
   },
 ];
 

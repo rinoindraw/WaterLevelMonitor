@@ -1,0 +1,235 @@
+@use "variables" as *;
+@use "mixins" as *;
+@use "responsive" as *;
+
+.historyTable {
+  @include panel-card;
+
+  .filters {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 12px;
+  }
+
+  .cardHeader {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+
+    .heading {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+
+      .title {
+        font-size: 16px;
+        font-weight: 500;
+        color: $gray-label-color;
+        text-transform: capitalize;
+      }
+
+      .subtitle {
+        max-width: 56ch;
+        font-size: 13px;
+        color: $soft-gray-darker;
+      }
+    }
+  }
+
+  // Tabel digulir ke samping di layar sempit, bukan memecah tata letak halaman
+  .tableWrapper {
+    position: relative;
+    overflow-x: auto;
+    border: 1px solid $soft-gray-darker-alt;
+    border-radius: 8px;
+
+    .table {
+      width: 100%;
+      min-width: 560px;
+      border-collapse: collapse;
+      font-size: 13px;
+
+      th {
+        padding: 10px 12px;
+        font-weight: 500;
+        text-align: center;
+        text-transform: capitalize;
+        color: $soft-gray-darker;
+        background: $white-color-alt;
+        border-bottom: 1px solid $soft-gray-darker-alt;
+      }
+
+      td {
+        padding: 8px 12px;
+        text-align: center;
+        color: $gray-label-color;
+        border-bottom: 1px solid $soft-gray-darker-alt;
+      }
+
+      tbody tr:last-child td {
+        border-bottom: none;
+      }
+
+      // Kolom nomor: sempit, rata tengah
+      .numberCell {
+        width: 56px;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .timeCell {
+        white-space: nowrap;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .cell {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 8px;
+
+        .level {
+          min-width: 64px;
+          font-weight: 500;
+          font-variant-numeric: tabular-nums;
+        }
+      }
+
+      // Min–maks bucket pada periode rata-rata (pengganti chip status)
+      .range {
+        font-size: 12px;
+        color: $soft-gray-darker;
+        white-space: nowrap;
+      }
+
+      .empty {
+        color: $soft-gray-darker;
+      }
+    }
+
+    .stateMessage {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 16px;
+      font-size: 13px;
+      text-align: center;
+      color: $soft-gray-darker;
+    }
+  }
+
+  .cardFooter {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+
+    .note {
+      font-size: 12px;
+      font-style: italic;
+      color: $soft-gray-darker;
+    }
+
+    .pager {
+      display: flex;
+      gap: 8px;
+
+      .pagerButton {
+        padding: 7px 14px;
+        font-size: 13px;
+        font-weight: 500;
+        font-family: inherit;
+        color: $primary-color-alt-two;
+        text-transform: capitalize;
+        background: none;
+        border: 1px solid $primary-color-alt-two;
+        border-radius: 8px;
+        cursor: pointer;
+
+        &:hover:not(:disabled) {
+          color: $white-color;
+          background: $primary-color-alt-two;
+        }
+
+        &.iconButton {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          min-width: 38px;
+          padding: 7px 9px;
+          font-size: 18px;
+        }
+
+        &:disabled {
+          cursor: default;
+          opacity: 0.4;
+        }
+
+        &:focus-visible {
+          outline: 2px solid $primary-color-alt-three;
+          outline-offset: 2px;
+        }
+      }
+    }
+  }
+
+  :global(body.darkTheme) & {
+    .cardHeader .heading {
+      .title {
+        color: $dark-text;
+      }
+
+      .subtitle {
+        color: $dark-text-muted;
+      }
+    }
+
+    .tableWrapper {
+      border-color: $dark-border;
+
+      .table {
+        th {
+          color: $dark-text-muted;
+          background: $dark-color-one;
+          border-bottom-color: $dark-border;
+        }
+
+        td {
+          color: $dark-text;
+          border-bottom-color: $dark-border;
+        }
+
+        .range,
+        .empty {
+          color: $dark-text-muted;
+        }
+      }
+
+      .stateMessage {
+        color: $dark-text-muted;
+      }
+    }
+
+    .cardFooter {
+      .note {
+        color: $dark-text-muted;
+      }
+
+      .pager .pagerButton {
+        color: $primary-color-alt-four;
+        border-color: $primary-color-alt-four;
+
+        &:hover:not(:disabled) {
+          color: $dark-color-one;
+          background: $primary-color-alt-four;
+        }
+      }
+    }
+  }
+}

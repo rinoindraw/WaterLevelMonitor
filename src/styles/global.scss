@@ -56,3 +56,19 @@ body.darkTheme {
     border-top-color: $dark-color-two;
   }
 }
+
+// Garis putih tipis di batas ubin peta.
+//
+// Gejalanya: kisi garis terang mendatar & tegak di sepanjang batas ubin, paling
+// kentara saat zoom in/out. SEBABNYA aturan bawaan Leaflet
+// `.leaflet-tile { mix-blend-mode: plus-lighter }`: mode itu MENJUMLAHKAN warna
+// yang bertumpuk, dan tepi dua ubin bersebelahan selalu bertumpuk sepersekian
+// piksel karena antialiasing — abu-abu + abu-abu dipotong jadi putih. Ubin
+// buram tidak perlu dicampur dengan apa pun, jadi dikembalikan ke `normal`.
+//
+// Tindihan lebar/tinggi 1 px SENGAJA tidak dipasang: peta ini memperbesar ubin
+// zoom 16 sampai zoom 19 (maxNativeZoom), dan Leaflet menulis ukuran ubin
+// inline sesuai skalanya — ukuran tetap akan merusak zoom di atas 16.
+.leaflet-container .leaflet-tile {
+  mix-blend-mode: normal !important;
+}

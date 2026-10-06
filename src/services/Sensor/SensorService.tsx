@@ -5,8 +5,8 @@ import {
 } from "../../utils/constants/MonitorConstants";
 import { firebaseApp } from "../Firebase/FirebaseApp";
 
-// Bentuk node yang ditulis ESP32 lewat kirimFirebase(). Nama field berasal
-// dari firmware, jadi dibiarkan apa adanya.
+// Bentuk node /sensorN yang ditulis ESP32 tiap ±3 detik (kirimFirebase()). Nama
+// field berasal dari firmware, jadi dibiarkan apa adanya.
 export interface SensorNodeResponse {
   jarak_cm: number;
   status: SensorStatus;
@@ -14,19 +14,19 @@ export interface SensorNodeResponse {
 
 export type SensorSnapshotResponse = Partial<Record<string, SensorNodeResponse>>;
 
-// [CHANGED] initializeApp pindah ke FirebaseApp.tsx supaya app-nya sama dengan
-// yang dipakai Auth — koneksi database ikut membawa sesi login.
-// Jalur tulis sengaja tetap terbuka: ESP32 mengirim data tanpa token.
+// initializeApp ada di FirebaseApp.tsx supaya app-nya sama dengan yang dipakai
+// Auth — koneksi database ikut membawa sesi login.
 const database = getDatabase(firebaseApp);
 
 export const SensorService = {
-  // [CHANGED] Dulu satu listener di root. Root tidak lagi boleh dibaca sejak
-  // node users & admins ada di sana — izin baca turun ke anaknya, jadi
-  // pembaca root otomatis ikut bisa membaca daftar pengguna. Sekarang satu
-  // listener per sensor, dan snapshot gabungannya dirakit di sini.
+  // Sumber data "terkini" = node /sensor1..3 yang diperbarui ESP32 tiap ±3
+  // detik, jadi kepala kartu, profil objek, dan peta realtime. Riwayat (grafik
+  // & tabel) dibaca terpisah dari /history. Listener ini realtime: callback
+  // terpanggil begitu node berubah — tanpa polling.
   //
-  // Callback dipanggil sekali untuk isi awal tiap sensor, lalu setiap kali
-  // salah satu berubah. Mengembalikan fungsi unsubscribe.
+  // Satu listener per sensor (root tidak boleh dibaca), dan snapshot
+  // gabungannya dirakit di sini. Callback dipanggil sekali untuk isi awal tiap
+  // sensor, lalu setiap kali node-nya berubah. Mengembalikan fungsi unsubscribe.
   subscribeSnapshot: (
     onData: (snapshot: SensorSnapshotResponse) => void,
     onError: (error: Error) => void,
@@ -37,7 +37,7 @@ export const SensorService = {
       onValue(
         ref(database, sensor.id),
         (snap) => {
-          snapshot[sensor.id] = snap.val() ?? undefined;
+          snapshot[sensor.id] = (snap.val() as SensorNodeResponse | null) ?? undefined;
           // Selalu kirim salinan: pemanggil membandingkan isinya, bukan
           // identitas objeknya.
           onData({ ...snapshot });

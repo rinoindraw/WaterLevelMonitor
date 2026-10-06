@@ -1,0 +1,116 @@
+@use "variables" as *;
+@use "mixins" as *;
+@use "responsive" as *;
+
+.weatherCard {
+  @include panel-card;
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 1000;
+  gap: 8px;
+  width: 220px;
+  padding: 10px 12px;
+
+  // Di ponsel kartu dipadatkan supaya tidak menutup peta
+  @media (max-width: $bp-mobile) {
+    top: 8px;
+    right: 8px;
+    width: 170px;
+    padding: 8px 10px;
+  }
+
+  .cardTitle {
+    font-size: 12px;
+    font-weight: 500;
+    color: $gray-label-color;
+    text-transform: capitalize;
+  }
+
+  .unavailable {
+    font-size: 12px;
+    color: $soft-gray-darker;
+  }
+
+  .summary {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    .icon {
+      flex-shrink: 0;
+      font-size: 40px;
+      color: $primary-color-alt-two;
+    }
+
+    .temperature {
+      font-size: 24px;
+      font-weight: 500;
+      line-height: 1;
+      color: $gray-label-color;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .condition {
+      font-size: 12px;
+      color: $soft-gray-darker;
+    }
+  }
+
+  .details {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+
+    .detail {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 12px;
+
+      dt {
+        color: $soft-gray-darker;
+      }
+
+      dd {
+        font-weight: 500;
+        color: $gray-label-color;
+        font-variant-numeric: tabular-nums;
+      }
+    }
+  }
+
+  .note {
+    font-size: 11px;
+    font-style: italic;
+    color: $soft-gray-darker;
+
+    .attribution {
+      color: $primary-color-alt-two;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+
+  :global(body.darkTheme) & {
+    .cardTitle,
+    .summary .temperature,
+    .details .detail dd {
+      color: $dark-text;
+    }
+
+    .unavailable,
+    .summary .condition,
+    .details .detail dt,
+    .note {
+      color: $dark-text-muted;
+    }
+
+    .summary .icon,
+    .note .attribution {
+      color: $primary-color-alt-four;
+    }
+  }
+}
