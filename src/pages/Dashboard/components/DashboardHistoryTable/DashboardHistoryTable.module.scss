@@ -138,6 +138,7 @@
 
     .pager {
       display: flex;
+      flex-wrap: wrap; // empat tombol (CSV, PDF, dua panah) bisa tidak muat di ponsel
       gap: 8px;
 
       .pagerButton {

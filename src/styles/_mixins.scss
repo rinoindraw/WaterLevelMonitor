@@ -370,6 +370,9 @@
 
     .tab {
       flex: 1;
+      // Padding samping dikecilkan: empat tab (tabel riwayat) dengan 16px per
+      // sisi lebih lebar dari kartu di ponsel 360 px.
+      padding-inline: 8px;
       text-align: center;
     }
   }
