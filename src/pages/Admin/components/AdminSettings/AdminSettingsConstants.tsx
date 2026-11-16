@@ -9,7 +9,7 @@ export const SETTINGS_SAVED_MESSAGE = "Pengaturan tersimpan. Perangkat akan mema
 export const SETTINGS_FAILED_MESSAGE = "Gagal menyimpan. Coba lagi.";
 
 // Pesan kesalahan isian — dicek di web sebelum dikirim, dan dicerminkan rules.
-export const THRESHOLD_RANGE_ERROR = "Nilai di luar jangkauan sensor.";
+export const THRESHOLD_RANGE_ERROR = "Nilai tidak boleh negatif.";
 export const THRESHOLD_ORDER_ERROR = "Ambang BAHAYA harus lebih besar daripada SIAGA.";
 export const HEIGHT_TOO_LOW_ERROR =
   "Jarak sensor ke dasar harus lebih besar daripada ambang BAHAYA — air tidak mungkin melewati sensornya.";

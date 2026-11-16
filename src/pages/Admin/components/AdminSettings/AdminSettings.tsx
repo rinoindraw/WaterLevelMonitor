@@ -4,11 +4,7 @@ import StatusChip from "../../../../components/StatusChip/StatusChip";
 import { SettingsService } from "../../../../services/Settings/SettingsService";
 import { UseAuthStore } from "../../../../stores/Auth/AuthStore";
 import { UseThresholdStore } from "../../../../stores/Settings/ThresholdStore";
-import {
-  SENSORS,
-  THRESHOLD_MAX_CM,
-  THRESHOLD_MIN_CM,
-} from "../../../../utils/constants/MonitorConstants";
+import { SENSORS } from "../../../../utils/constants/MonitorConstants";
 import type { SensorHeights } from "../../../../stores/Settings/ThresholdStore";
 import styles from "./AdminSettings.module.scss";
 import {
@@ -56,11 +52,7 @@ const AdminSettings = () => {
       setError(THRESHOLD_NUMBER_ERROR);
       return;
     }
-    if (
-      semuaAngka.some(
-        (value) => value < THRESHOLD_MIN_CM || value > THRESHOLD_MAX_CM,
-      )
-    ) {
+    if (semuaAngka.some((value) => value < 0)) {
       setError(THRESHOLD_RANGE_ERROR);
       return;
     }
@@ -124,8 +116,7 @@ const AdminSettings = () => {
                 type="number"
                 inputMode="numeric"
                 name="alertCm"
-                min={THRESHOLD_MIN_CM}
-                max={THRESHOLD_MAX_CM}
+                min={0}
                 defaultValue={alertCm}
                 disabled={!isAdmin || !isLoaded}
               />
@@ -146,8 +137,7 @@ const AdminSettings = () => {
                 type="number"
                 inputMode="numeric"
                 name="dangerCm"
-                min={THRESHOLD_MIN_CM}
-                max={THRESHOLD_MAX_CM}
+                min={0}
                 defaultValue={dangerCm}
                 disabled={!isAdmin || !isLoaded}
               />
@@ -186,8 +176,7 @@ const AdminSettings = () => {
                     type="number"
                     inputMode="numeric"
                     name={sensor.id}
-                    min={THRESHOLD_MIN_CM}
-                    max={THRESHOLD_MAX_CM}
+                    min={0}
                     defaultValue={sensorHeights[sensor.id]}
                     disabled={!isAdmin || !isLoaded}
                   />
@@ -201,10 +190,9 @@ const AdminSettings = () => {
 
         {/* Pembacaan ulang dari nilai yang sedang berlaku, bukan dari isian */}
         <p className={styles.preview}>
-          Berlaku sekarang, diukur dari dasar:{" "}
-          <StatusChip status="NORMAL" /> &lt; {alertCm} cm ·{" "}
-          <StatusChip status="SIAGA" /> {alertCm}–{dangerCm} cm ·{" "}
-          <StatusChip status="BAHAYA" /> ≥ {dangerCm} cm
+          Berlaku sekarang, diukur dari dasar: <StatusChip status="NORMAL" />{" "}
+          &lt; {alertCm} cm · <StatusChip status="SIAGA" /> {alertCm}–{dangerCm}{" "}
+          cm · <StatusChip status="BAHAYA" /> ≥ {dangerCm} cm
         </p>
 
         {error && (

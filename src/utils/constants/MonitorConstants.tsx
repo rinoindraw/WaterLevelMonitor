@@ -105,11 +105,6 @@ export const DEFAULT_DANGER_THRESHOLD_CM = 120; // air >= ini → BAHAYA
 // tinggi air ikut salah tanpa gejala.
 export const DEFAULT_SENSOR_HEIGHT_CM = 200;
 
-// Batas yang masuk akal untuk HC-SR04 (jangkauan 2–400 cm). Dipakai form dan
-// dicerminkan di rules database.
-export const THRESHOLD_MIN_CM = 2;
-export const THRESHOLD_MAX_CM = 400;
-
 // ===== [CONFIG] Sensor =====
 // [CHANGED] Ketiga sensor terpasang di SATU controller ESP32, jadi tidak
 // punya koordinat sendiri-sendiri (lihat DEVICE_LOCATION).
